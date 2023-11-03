@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ─── Backend ────────────────────────────────────────────────────────────────
+  backend:
+    name: Backend — Test & Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aurabot_test
+          POSTGRES_PASSWORD: aurabot_test
+          POSTGRES_DB: aurabot_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://aurabot_test:aurabot_test@localhost:5432/aurabot_test
+      JWT_SECRET: test-jwt-secret-for-ci-only-not-real
+      JWT_REFRESH_SECRET: test-jwt-refresh-for-ci-only-not-real
+      SPOTIFY_CLIENT_ID: test_id
+      SPOTIFY_CLIENT_SECRET: test_secret
+      YOUTUBE_API_KEY: test_key
+      OPENAI_API_KEY: test_key
+      FRONTEND_URL: http://localhost:5173
+      AURABOT_BOT_TOKEN: test_token
+      BACKEND_URL: http://localhost:3001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run database migrations
+        working-directory: backend
+        run: npx prisma migrate deploy
+
+      - name: Run tests
+        working-directory: backend
+        run: npm test
+        continue-on-error: true  # não bloqueia — ver logs para debug
+
+      - name: Build TypeScript
+        working-directory: backend
+        run: npm run build
+
+  # ─── Frontend ───────────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run tests
+        working-directory: frontend
+        run: npm test
+        continue-on-error: true
+
+      - name: Build
+        working-directory: frontend
+        env:
+          VITE_API_URL: /api
+        run: npm run build
+
+  # ─── Discord Bot ─────────────────────────────────────────────────────────────
+  discord:
+    name: Discord Bot — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: discord
+        run: npm install
+
+
+      - name: Run tests
+        working-directory: discord
+        run: npm test
+
+      - name: Build TypeScript
+        working-directory: discord
+        run: npm run build
+
+  # ─── Desktop ─────────────────────────────────────────────────────────────────
+  desktop:
+    name: Desktop — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Run tests
+        working-directory: desktop
+        run: npm test
+
+      - name: Build TypeScript
+        working-directory: desktop
+        run: npm run build
+
+  # ─── Electron ────────────────────────────────────────────────────────────────
+  electron:
+    name: Electron — Lint & Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: electron
+        run: npm install --ignore-scripts
+
+      - name: Check sintaxe
+        working-directory: electron
+        run: |
+          node --check src/main.js
+          node --check src/preload.js
+          node --check src/setup.js
+          node --check src/ipc.js

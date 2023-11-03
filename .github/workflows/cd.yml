@@ -1,0 +1,49 @@
+name: CD
+
+# CD roda apenas ao criar uma tag de versão (ex: v1.0.0)
+# Uso: git tag v1.0.0 && git push origin v1.0.0
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  # Apenas cria a release no GitHub — os instaladores são gerados pelo build-installers.yml
+  release:
+    name: Criar Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gerar changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
+          else
+            LOG=$(git log --pretty=format:"- %s" --max-count=20)
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: AuraBot ${{ github.ref_name }}
+          body: |
+            ## 🎵 AuraBot ${{ github.ref_name }}
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ---
+            Os instaladores (.exe, .dmg, .AppImage) são gerados automaticamente
+            e aparecem aqui em alguns minutos pelo workflow **Build Installers**.
+          draft: false
+          prerelease: false

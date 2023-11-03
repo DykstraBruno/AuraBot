@@ -1,0 +1,58 @@
+name: Security
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # toda segunda-feira às 8h UTC
+  workflow_dispatch:
+
+# Só roda no agendamento semanal — não bloqueia PRs nem pushs
+jobs:
+  codeql:
+    name: CodeQL — Análise estática
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+          queries: security-and-quality
+
+      - name: Build automático
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Executar análise
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript'
+
+  audit:
+    name: Audit — ${{ matrix.workspace }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [backend, frontend, discord, desktop]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Instalar deps
+        working-directory: ${{ matrix.workspace }}
+        run: npm install --ignore-scripts
+
+      - name: Auditoria npm
+        working-directory: ${{ matrix.workspace }}
+        run: npm audit --audit-level=critical
+        continue-on-error: true

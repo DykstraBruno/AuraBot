@@ -1,0 +1,105 @@
+name: Build Installers
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build — ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false  # continua os outros mesmo se um falhar
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+          - os: macos-latest
+            platform: mac
+          - os: ubuntu-latest
+            platform: linux
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # ── Backend ──────────────────────────────────────────────────────────────
+      - name: Instalar dependências — backend
+        working-directory: backend
+        run: npm install
+
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+
+      # ── Frontend ─────────────────────────────────────────────────────────────
+      - name: Instalar dependências — frontend
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend (modo Electron)
+        working-directory: frontend
+        run: npm run build:electron
+        env:
+          BUILD_TARGET: electron
+          VITE_API_URL: http://localhost:3001/api
+
+      # ── Electron ─────────────────────────────────────────────────────────────
+      - name: Instalar dependências — Electron
+        working-directory: electron
+        run: npm install
+
+      - name: Build instalador — ${{ matrix.platform }}
+        working-directory: electron
+        run: npm run build:${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS: desativa assinatura de código (não obrigatório para uso pessoal)
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # ── Upload ───────────────────────────────────────────────────────────────
+      - name: Upload instaladores
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurabot-${{ matrix.platform }}-${{ github.ref_name }}
+          path: |
+            electron/dist/*.exe
+            electron/dist/*.dmg
+            electron/dist/*.AppImage
+            electron/dist/*.deb
+          if-no-files-found: warn
+          retention-days: 30
+
+  # ─── Anexar instaladores à Release ───────────────────────────────────────────
+  attach-to-release:
+    name: Anexar instaladores à Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()  # roda mesmo se algum build falhou
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar todos os artefatos
+        uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Listar arquivos gerados
+        run: find installers -type f 2>/dev/null || echo "Nenhum instalador encontrado"
+
+      - name: Anexar à release
+        uses: softprops/action-gh-release@v1
+        if: hashFiles('installers/**') != ''
+        with:
+          files: installers/**
+        continue-on-error: true
