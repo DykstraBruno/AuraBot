@@ -138,13 +138,12 @@ Clique no botão de microfone e fale naturalmente. O AuraBot entende **Portuguê
 
 ## 🎮 Discord bot
 
-O AuraBot também funciona como bot no Discord. Cada usuário do servidor tem sua própria fila e volume independentes.
+O AuraBot também funciona como bot no Discord. O bot busca e toca músicas do YouTube diretamente, sem depender do backend ou banco de dados.
 
 ### Slash commands
 
 ```
-/play musica:Bohemian Rhapsody
-/play musica:Queen  fonte:spotify
+/play query:Bohemian Rhapsody
 /stop
 /next
 /turnup
@@ -152,7 +151,16 @@ O AuraBot também funciona como bot no Discord. Cada usuário do servidor tem su
 /queue
 ```
 
-O autocomplete sugere músicas enquanto você digita.
+O autocomplete sugere músicas enquanto você digita — sem precisar enviar o comando antes.
+
+### Dependências do bot
+
+O bot requer **yt-dlp** e **ffmpeg** instalados na máquina. No Windows via winget:
+
+```powershell
+winget install yt-dlp.yt-dlp
+winget install Gyan.FFmpeg
+```
 
 ### Configurar o bot Discord
 
@@ -161,7 +169,8 @@ O autocomplete sugere músicas enquanto você digita.
 3. Menu lateral → **Bot** → **Reset Token** → copie o token
 4. Ative todos os **Privileged Gateway Intents**
 5. **OAuth2** → **URL Generator** → marque `bot` e `applications.commands`
-6. Copie o link e adicione o bot ao seu servidor
+6. Adicione a permissão **Administrator** (ou no mínimo: Connect, Speak, Use Slash Commands)
+7. Copie o link gerado e adicione o bot ao seu servidor
 
 Configure o arquivo `discord/.env`:
 
@@ -169,14 +178,19 @@ Configure o arquivo `discord/.env`:
 DISCORD_TOKEN=token_do_bot
 DISCORD_CLIENT_ID=application_id
 DISCORD_GUILD_ID=id_do_servidor
-AURABOT_API_URL=http://localhost:3001/api
-AURABOT_BOT_TOKEN=mesmo_valor_do_backend
+```
+
+Registre os slash commands no servidor (necessário apenas uma vez ou ao adicionar comandos novos):
+
+```bash
+cd discord
+node dist/deploy-commands.js
 ```
 
 Inicie o bot:
 
 ```bash
-npm run dev:discord
+node dist/index.js
 ```
 
 ---
@@ -193,8 +207,8 @@ Esta seção é para quem quer modificar o código ou contribuir com o projeto.
 | **Interface** | React 18, Vite, TypeScript, Zustand |
 | **API** | Node.js 20, Express, Prisma, PostgreSQL |
 | **Voz** | OpenAI Whisper (STT) + TTS |
-| **Música** | Spotify API + YouTube Data API v3 |
-| **Discord** | discord.js v14 |
+| **Música** | Spotify API + yt-dlp + ffmpeg |
+| **Discord** | discord.js v14, @discordjs/voice v0.19 |
 | **Testes** | Vitest, Testing Library (~220 casos) |
 | **CI/CD** | GitHub Actions |
 
@@ -315,7 +329,13 @@ Isso gera `icon.ico` (Windows), `icon.icns` (macOS) e `icon.png` (Linux).
 → A chave da OpenAI é necessária para comandos de voz. Sem ela, apenas a busca por texto funciona.
 
 **Bot Discord não responde**  
-→ Execute `npm run discord:deploy` para registrar os slash commands.
+→ Execute `cd discord && node dist/deploy-commands.js` para registrar os slash commands.
+
+**Bot entra no canal mas não toca som**  
+→ Verifique se `yt-dlp` e `ffmpeg` estão instalados e no PATH (`winget install yt-dlp.yt-dlp` e `winget install Gyan.FFmpeg`).
+
+**Autocomplete não aparece no /play**  
+→ Rode o deploy-commands novamente e aguarde 1-2 minutos para o Discord atualizar.
 
 ---
 

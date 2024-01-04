@@ -5,8 +5,8 @@ import {
   validateUsername,
   isValidEmail,
   checkPassword,
-} from '../../utils/validators';
-import { ValidationError } from '../../utils/errors';
+} from '../../../utils/validators';
+import { ValidationError } from '../../../utils/errors';
 
 describe('validateEmail', () => {
   it('aceita emails válidos', () => {

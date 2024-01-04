@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AuthService } from '../../auth/auth.service';
-import { prisma } from '../../config/database';
-import { emailService } from '../../email/email.service';
+import { AuthService } from '../../../auth/auth.service';
+import { prisma } from '../../../config/database';
+import { emailService } from '../../../email/email.service';
 import {
   ConflictError,
   UnauthorizedError,
   AccountLockedError,
   ValidationError,
   AppError,
-} from '../../utils/errors';
+} from '../../../utils/errors';
 import bcrypt from 'bcryptjs';
 
 // ─── Factories ────────────────────────────────────────────────────────────────

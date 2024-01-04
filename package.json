@@ -40,5 +40,11 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "@distube/ytdl-core": "^4.16.12",
+    "opusscript": "^0.0.8",
+    "play-dl": "^1.9.7"
   }
 }
