@@ -10,6 +10,7 @@ import { musicRouter } from './music/music.router';
 import { voiceRouter } from './voice/voice.router';
 import { spotifyRouter } from './spotify/spotify.router';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { generateCsrfToken } from './middleware/csrfProtection';
 import { logger } from './utils/logger';
 
 const app = express();
@@ -27,7 +28,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Platform'],
 }));
 
 // Rate limit global: 200 req / 15min por IP
@@ -62,6 +63,14 @@ app.get('/health', (_req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
   });
+});
+
+// ─── CSRF token endpoint ──────────────────────────────────────────────────────
+// Clientes web fazem GET /api/auth/csrf-token antes de operações de mutação.
+// O token é gerado na sessão e retornado para uso em X-CSRF-Token.
+app.get('/api/auth/csrf-token', (req, res) => {
+  const token = generateCsrfToken(req);
+  res.json({ success: true, data: { csrfToken: token } });
 });
 
 // ─── Rotas ────────────────────────────────────────────────────────────────────

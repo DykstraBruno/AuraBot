@@ -106,8 +106,9 @@ describe('SpotifyOAuthService', () => {
 
     it('rejeita state expirado (>10 min)', async () => {
       const oldState = makeState('user-1', -(11 * 60 * 1000));
+      // A exceção interna é capturada e relançada como AppError com mensagem externa
       await expect(service.exchangeCode('code', oldState))
-        .rejects.toThrow('State expirado');
+        .rejects.toThrow('Parâmetro state inválido ou expirado');
     });
 
     it('rejeita state inválido', async () => {
@@ -180,7 +181,7 @@ describe('SpotifyOAuthService', () => {
     });
 
     it('retorna isPremium=true para conta Premium', async () => {
-      const futureExpiry = new Date(Date.now() + 60_000);
+      const futureExpiry = new Date(Date.now() + 5 * 60_000); // 5min — além da margem de 60s do serviço
       vi.mocked(prisma.user.findUnique).mockResolvedValue(
         makeUser({
           spotifyId: 'sp-123',
@@ -196,7 +197,7 @@ describe('SpotifyOAuthService', () => {
     });
 
     it('retorna isPremium=false para conta free', async () => {
-      const futureExpiry = new Date(Date.now() + 60_000);
+      const futureExpiry = new Date(Date.now() + 5 * 60_000); // 5min — além da margem de 60s do serviço
       vi.mocked(prisma.user.findUnique).mockResolvedValue(
         makeUser({
           spotifyId: 'sp-123',
@@ -215,7 +216,7 @@ describe('SpotifyOAuthService', () => {
 
   describe('play', () => {
     it('lança SPOTIFY_PREMIUM_REQUIRED para erro 403', async () => {
-      const futureExpiry = new Date(Date.now() + 60_000);
+      const futureExpiry = new Date(Date.now() + 5 * 60_000); // 5min — além da margem de 60s do serviço
       vi.mocked(prisma.user.findUnique).mockResolvedValue(
         makeUser({ spotifyAccessToken: 'token', spotifyRefreshToken: 'ref', spotifyTokenExpiry: futureExpiry }) as any
       );
@@ -231,7 +232,7 @@ describe('SpotifyOAuthService', () => {
     });
 
     it('lança SPOTIFY_NO_DEVICE para erro 404', async () => {
-      const futureExpiry = new Date(Date.now() + 60_000);
+      const futureExpiry = new Date(Date.now() + 5 * 60_000); // 5min — além da margem de 60s do serviço
       vi.mocked(prisma.user.findUnique).mockResolvedValue(
         makeUser({ spotifyAccessToken: 'token', spotifyRefreshToken: 'ref', spotifyTokenExpiry: futureExpiry }) as any
       );

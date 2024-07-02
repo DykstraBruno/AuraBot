@@ -57,10 +57,10 @@ const PATTERNS: Record<SupportedLanguage, Array<{
     { pattern: /^(mais baixo|baixa(r)?( o)?( volume)?|diminui(r)?( o)?( volume)?|volume (mais )?baixo|turn down)/i, command: 'turndown' },
   ],
   en: [
-    // play
-    { pattern: /^(play|put on|i want to hear|play me|can you play|start playing)\s+(.+)/i, command: 'play', extractQuery: true },
-    // stop
-    { pattern: /^(stop|pause|quiet|enough|cancel|turn off|shut up)/i, command: 'stop' },
+    // play — alternativas mais longas antes de mais curtas para evitar match parcial
+    { pattern: /^(start playing|can you play|play me|put on|i want to hear|play)\s+(.+)/i, command: 'play', extractQuery: true },
+    // stop — \b evita que "quieter" seja capturado pelo prefixo "quiet"
+    { pattern: /^(stop|pause|quiet\b|enough|cancel|turn off|shut up)/i, command: 'stop' },
     // next
     { pattern: /^(next|skip|forward|next (one|song|track)|skip (this|it))/i, command: 'next' },
     // turnup
@@ -230,7 +230,12 @@ export class VoiceService {
           response = msgs.notFound(parsed.query);
         }
       } catch (err: any) {
-        response = err.message ?? msgs.notUnderstood(transcription.text);
+        // TRACK_NOT_FOUND → mensagem amigável no idioma correto
+        if (err.code === 'TRACK_NOT_FOUND' && parsed.query) {
+          response = msgs.notFound(parsed.query);
+        } else {
+          response = err.message ?? msgs.notUnderstood(transcription.text);
+        }
         logger.warn(`Erro no comando de voz: ${err.message}`);
       }
     }

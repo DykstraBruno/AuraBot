@@ -5,7 +5,7 @@ import { musicService } from '../../../music/music.service';
 import { AppError, NotFoundError } from '../../../utils/errors';
 
 // ─── Mock do MusicService ─────────────────────────────────────────────────────
-vi.mock('../../music/music.service', () => ({
+vi.mock('../../../music/music.service', () => ({
   musicService: {
     search: vi.fn(),
   },

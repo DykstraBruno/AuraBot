@@ -84,8 +84,12 @@ describe('AuthService', () => {
     });
 
     it('rejeita email duplicado com ConflictError', async () => {
+      // Cada chamada a register() usa 2 findUnique (Promise.all([email, username]))
+      // Precisamos mockar 4 valores para 2 chamadas
       vi.mocked(prisma.user.findUnique)
-        .mockResolvedValueOnce(makeUser()) // email existe
+        .mockResolvedValueOnce(makeUser()) // 1ª chamada: email existe → ConflictError
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(makeUser()) // 2ª chamada: email existe → mesma mensagem
         .mockResolvedValueOnce(null);
 
       await expect(service.register(validDto)).rejects.toThrow(ConflictError);
@@ -93,9 +97,12 @@ describe('AuthService', () => {
     });
 
     it('rejeita username duplicado com ConflictError', async () => {
+      // 4 valores para 2 chamadas
       vi.mocked(prisma.user.findUnique)
-        .mockResolvedValueOnce(null)         // email livre
-        .mockResolvedValueOnce(makeUser());  // username existe
+        .mockResolvedValueOnce(null)         // 1ª: email livre
+        .mockResolvedValueOnce(makeUser())   // 1ª: username existe → ConflictError
+        .mockResolvedValueOnce(null)         // 2ª: email livre
+        .mockResolvedValueOnce(makeUser());  // 2ª: username existe → mesma mensagem
 
       await expect(service.register(validDto)).rejects.toThrow(ConflictError);
       await expect(service.register(validDto)).rejects.toThrow('nome de usuário já está em uso');
@@ -326,7 +333,7 @@ describe('AuthService', () => {
 
     it('lança erro para sessão revogada', async () => {
       // Gera um token válido primeiro
-      const { generateTokenPair } = await import('../../utils/jwt');
+      const { generateTokenPair } = await import('../../../utils/jwt');
       const tokens = generateTokenPair({
         userId: 'u1', email: 'a@b.com', username: 'u', sessionId: 's1',
       });
@@ -339,7 +346,7 @@ describe('AuthService', () => {
     });
 
     it('lança erro para sessão expirada', async () => {
-      const { generateTokenPair } = await import('../../utils/jwt');
+      const { generateTokenPair } = await import('../../../utils/jwt');
       const tokens = generateTokenPair({
         userId: 'u1', email: 'a@b.com', username: 'u', sessionId: 's1',
       });
