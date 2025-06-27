@@ -87,94 +87,86 @@ export class MusicService {
 
   // ─── Spotify ──────────────────────────────────────────────────────────────
 
+  import { spawn } from 'child_process';
+
   async searchSpotify(query: string, limit = 10): Promise<SearchResult[]> {
-    const token = await this.getSpotifyClientToken();
-
-    const params = new URLSearchParams({
-      q: query,
-      type: 'track',
-      limit: String(Math.min(limit, 50)),
-      market: 'BR',
+    return new Promise((resolve, reject) => {
+      const args = [
+        'search', query,
+        '--limit', String(Math.min(limit, 50)),
+        '--output', 'json',
+      ];
+      const proc = spawn('spotdl', args);
+      let output = '';
+      proc.stdout.on('data', (d) => { output += d.toString(); });
+      proc.stderr.on('data', () => {});
+      const timer = setTimeout(() => { proc.kill(); reject(new Error('spotDL timeout')); }, 15000);
+      proc.on('close', () => {
+        clearTimeout(timer);
+        try {
+          const data = JSON.parse(output);
+          const tracks = Array.isArray(data) ? data : (data.tracks ?? []);
+          const results = tracks.map((t: any) => ({
+            id: `spotify-${t.song_id || t.id}`,
+            title: t.name || t.title,
+            artist: t.artists ? t.artists.join(', ') : t.artist,
+            album: t.album,
+            duration: t.duration,
+            coverUrl: t.cover_url || t.coverArt,
+            previewUrl: undefined,
+            source: 'spotify' as const,
+            sourceId: t.song_id || t.id,
+          })).filter((r: any) => r.id && r.title);
+          resolve(results);
+        } catch (err) {
+          reject(new Error('Falha ao processar resposta do spotDL'));
+        }
+      });
+      proc.on('error', (err) => { clearTimeout(timer); reject(err); });
     });
-
-    const res = await fetch(`https://api.spotify.com/v1/search?${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        this.invalidateSpotifyToken();
-        throw new ExternalAPIError('Spotify', 'Token inválido — renovando...');
-      }
-      if (res.status === 429) {
-        throw new ExternalAPIError('Spotify', 'Limite de requisições atingido');
-      }
-      throw new ExternalAPIError('Spotify', `Busca falhou: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json() as any;
-    const tracks: SpotifyTrack[] = data.tracks?.items ?? [];
-
-    return tracks
-      .filter(t => t.id && t.name)
-      .map(t => ({
-        id: `spotify-${t.id}`,
-        title: t.name,
-        artist: t.artists.map(a => a.name).join(', '),
-        album: t.album?.name,
-        duration: t.duration_ms ? Math.floor(t.duration_ms / 1000) : undefined,
-        coverUrl: t.album?.images?.[0]?.url,
-        previewUrl: t.preview_url ?? undefined,
-        source: 'spotify' as const,
-        sourceId: t.id,
-      }));
   }
 
   // ─── YouTube ──────────────────────────────────────────────────────────────
 
+  import { spawn } from 'child_process';
+
   async searchYouTube(query: string, limit = 10): Promise<SearchResult[]> {
-    const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) throw new ExternalAPIError('YouTube', 'Chave de API não configurada');
-
-    const params = new URLSearchParams({
-      part: 'snippet',
-      q: `${query} official audio`,
-      type: 'video',
-      videoCategoryId: '10', // Música
-      maxResults: String(Math.min(limit, 50)),
-      key: apiKey,
-      regionCode: 'BR',
+    return new Promise((resolve, reject) => {
+      const args = [
+        `ytsearch${limit}:${query}`,
+        '--dump-json',
+        '--flat-playlist',
+        '--no-download',
+        '--no-warnings',
+        '--quiet',
+      ];
+      const proc = spawn('yt-dlp', args);
+      let output = '';
+      proc.stdout.on('data', (d) => { output += d.toString(); });
+      proc.stderr.on('data', () => {});
+      const timer = setTimeout(() => { proc.kill(); reject(new Error('yt-dlp timeout')); }, 15000);
+      proc.on('close', () => {
+        clearTimeout(timer);
+        const results = output.trim().split('\n')
+          .filter(Boolean)
+          .map(line => {
+            try {
+              const item = JSON.parse(line);
+              return {
+                id: `youtube-${item.id}`,
+                title: item.title ?? 'Desconhecido',
+                artist: item.uploader ?? item.channel ?? 'YouTube',
+                coverUrl: item.thumbnail,
+                source: 'youtube' as const,
+                sourceId: item.id,
+              };
+            } catch { return null; }
+          })
+          .filter((r): r is SearchResult => r !== null && Boolean(r.sourceId));
+        resolve(results);
+      });
+      proc.on('error', (err) => { clearTimeout(timer); reject(err); });
     });
-
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
-
-    if (!res.ok) {
-      if (res.status === 403) {
-        const body = (await res.json().catch(() => ({}))) as any;
-        const reason = body.error?.errors?.[0]?.reason;
-        if (reason === 'quotaExceeded') {
-          throw new ExternalAPIError('YouTube', 'Cota diária da API atingida');
-        }
-        throw new ExternalAPIError('YouTube', 'Chave de API inválida ou sem permissão');
-      }
-      throw new ExternalAPIError('YouTube', `Busca falhou: ${res.status}`);
-    }
-
-    const data = await res.json() as any;
-    const items: YouTubeSearchItem[] = data.items ?? [];
-
-    return items
-      .filter(v => v.id?.videoId)
-      .map(v => ({
-        id: `youtube-${v.id.videoId}`,
-        title: v.snippet.title,
-        artist: v.snippet.channelTitle,
-        coverUrl:
-          v.snippet.thumbnails?.high?.url ??
-          v.snippet.thumbnails?.default?.url,
-        source: 'youtube' as const,
-        sourceId: v.id.videoId,
-      }));
   }
 
   // ─── Salva no histórico ────────────────────────────────────────────────────
@@ -223,46 +215,7 @@ export class MusicService {
 
   // ─── Spotify token (Client Credentials) ───────────────────────────────────
 
-  async getSpotifyClientToken(): Promise<string> {
-    if (this.spotifyToken && this.spotifyTokenExpiry && this.spotifyTokenExpiry > new Date()) {
-      return this.spotifyToken;
-    }
-
-    const clientId = process.env.SPOTIFY_CLIENT_ID;
-    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-
-    if (!clientId || !clientSecret) {
-      throw new ExternalAPIError('Spotify', 'Credenciais não configuradas');
-    }
-
-    const creds = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
-    const res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${creds}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    if (!res.ok) {
-      throw new ExternalAPIError('Spotify', 'Falha ao obter token de acesso');
-    }
-
-    const data = await res.json() as any;
-    this.spotifyToken = data.access_token;
-    // Expira 60s antes para evitar race condition
-    this.spotifyTokenExpiry = new Date(Date.now() + (data.expires_in - 60) * 1000);
-
-    logger.debug('Token Spotify renovado');
-    return this.spotifyToken!;
-  }
-
-  invalidateSpotifyToken() {
-    this.spotifyToken = null;
-    this.spotifyTokenExpiry = null;
-  }
+  // getSpotifyClientToken e invalidateSpotifyToken removidos (não necessários)
 }
 
 export const musicService = new MusicService();

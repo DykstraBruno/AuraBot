@@ -1,212 +1,248 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AuraBot — Configuração inicial</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #080809;
-      color: #f0ede8;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .card {
-      width: 100%;
-      max-width: 520px;
-      background: #18181c;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px;
-      padding: 36px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-      justify-content: center;
-    }
-    .logo-icon {
-      width: 40px; height: 40px;
-      background: #f5a820;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #000; font-weight: 700;
-    }
-    .logo-text { font-size: 22px; font-weight: 700; }
-    h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; text-align: center; }
-    .sub { font-size: 13px; color: #8a8880; text-align: center; margin-bottom: 28px; line-height: 1.6; }
-    .field { margin-bottom: 16px; }
-    label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: #8a8880;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    input {
-      width: 100%;
-      height: 44px;
-      background: #1f1f24;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px;
-      padding: 0 14px;
-      color: #f0ede8;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input:focus { border-color: #f5a820; }
-    .hint { font-size: 11px; color: #4a4845; margin-top: 4px; }
-    .hint a { color: #f5a820; text-decoration: none; }
-    .btn {
-      width: 100%;
-      height: 48px;
-      background: #f5a820;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #000;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.15s;
-    }
-    .btn:hover { background: #c47d0e; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .skip {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 12px;
-      color: #4a4845;
-    }
-    .skip a { color: #8a8880; cursor: pointer; text-decoration: underline; }
-    .error { font-size: 12px; color: #e05252; margin-top: 8px; }
-    .success { font-size: 13px; color: #52c97a; text-align: center; margin-top: 16px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="logo">
-      <div class="logo-icon">♪</div>
-      <span class="logo-text">AuraBot</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AuraBot — Configuração inicial</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #080809;
+        color: #f0ede8;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 520px;
+        background: #18181c;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        padding: 36px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        justify-content: center;
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: #f5a820;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #000;
+        font-weight: 700;
+      }
+      .logo-text {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        text-align: center;
+      }
+      .sub {
+        font-size: 13px;
+        color: #8a8880;
+        text-align: center;
+        margin-bottom: 28px;
+        line-height: 1.6;
+      }
+      .field {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: #8a8880;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        height: 44px;
+        background: #1f1f24;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        padding: 0 14px;
+        color: #f0ede8;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input:focus {
+        border-color: #f5a820;
+      }
+      .hint {
+        font-size: 11px;
+        color: #4a4845;
+        margin-top: 4px;
+      }
+      .hint a {
+        color: #f5a820;
+        text-decoration: none;
+      }
+      .btn {
+        width: 100%;
+        height: 48px;
+        background: #f5a820;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #000;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.15s;
+      }
+      .btn:hover {
+        background: #c47d0e;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .skip {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 12px;
+        color: #4a4845;
+      }
+      .skip a {
+        color: #8a8880;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .error {
+        font-size: 12px;
+        color: #e05252;
+        margin-top: 8px;
+      }
+      .success {
+        font-size: 13px;
+        color: #52c97a;
+        text-align: center;
+        margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">
+        <div class="logo-icon">♪</div>
+        <span class="logo-text">AuraBot</span>
+      </div>
+
+      <h2>Configuração inicial</h2>
+      <p class="sub">
+        Para o AuraBot funcionar, você precisa das chaves de API gratuitas.<br />
+        Isso só é feito uma vez.
+      </p>
+
+      <form id="form">
+        <div class="field">
+          <label
+            >OpenAI API Key
+            <span style="color: #4a4845; font-size: 10px; text-transform: none"
+              >(opcional — para comandos por voz)</span
+            ></label
+          >
+          <input type="password" id="openaiKey" placeholder="sk-..." />
+          <div class="hint">
+            <a href="https://platform.openai.com/api-keys" target="_blank">
+              → Como obter (~$0.006/min de áudio)
+            </a>
+          </div>
+        </div>
+
+        <button class="btn" type="submit" id="saveBtn">
+          Salvar e abrir o AuraBot
+        </button>
+      </form>
+
+      <div class="skip">
+        <a id="skipLink">Configurar depois →</a>
+      </div>
     </div>
 
-    <h2>Configuração inicial</h2>
-    <p class="sub">
-      Para o AuraBot funcionar, você precisa das chaves de API gratuitas.<br>
-      Isso só é feito uma vez.
-    </p>
+    <script>
+      const { ipcRenderer } = require("electron");
+      const path = require("path");
+      const fs = require("fs");
+      const os = require("os");
 
-    <form id="form">
-      <div class="field">
-        <label>Spotify Client ID</label>
-        <input type="text" id="spotifyId" placeholder="Obtenha em developer.spotify.com" />
-        <div class="hint">
-          <a href="https://developer.spotify.com/dashboard" target="_blank">
-            → Como obter (gratuito)
-          </a>
-        </div>
-      </div>
+      function getEnvPath() {
+        const platform = process.platform;
+        const home = os.homedir();
+        if (platform === "win32")
+          return path.join(process.env.APPDATA, "AuraBot", ".env");
+        if (platform === "darwin")
+          return path.join(
+            home,
+            "Library",
+            "Application Support",
+            "AuraBot",
+            ".env",
+          );
+        return path.join(home, ".config", "AuraBot", ".env");
+      }
 
-      <div class="field">
-        <label>Spotify Client Secret</label>
-        <input type="password" id="spotifySecret" placeholder="••••••••••••••••" />
-      </div>
+      function updateEnv(updates) {
+        const envPath = getEnvPath();
+        let content = fs.existsSync(envPath)
+          ? fs.readFileSync(envPath, "utf-8")
+          : "";
 
-      <div class="field">
-        <label>YouTube API Key</label>
-        <input type="text" id="youtubeKey" placeholder="AIza..." />
-        <div class="hint">
-          <a href="https://console.cloud.google.com" target="_blank">
-            → Como obter (gratuito, 10.000 buscas/dia)
-          </a>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>OpenAI API Key <span style="color:#4a4845;font-size:10px;text-transform:none">(opcional — para comandos por voz)</span></label>
-        <input type="password" id="openaiKey" placeholder="sk-..." />
-        <div class="hint">
-          <a href="https://platform.openai.com/api-keys" target="_blank">
-            → Como obter (~$0.006/min de áudio)
-          </a>
-        </div>
-      </div>
-
-      <button class="btn" type="submit" id="saveBtn">Salvar e abrir o AuraBot</button>
-    </form>
-
-    <div class="skip">
-      <a id="skipLink">Configurar depois →</a>
-    </div>
-  </div>
-
-  <script>
-    const { ipcRenderer } = require('electron');
-    const path = require('path');
-    const fs   = require('fs');
-    const os   = require('os');
-
-    function getEnvPath() {
-      const platform = process.platform;
-      const home = os.homedir();
-      if (platform === 'win32')   return path.join(process.env.APPDATA, 'AuraBot', '.env');
-      if (platform === 'darwin')  return path.join(home, 'Library', 'Application Support', 'AuraBot', '.env');
-      return path.join(home, '.config', 'AuraBot', '.env');
-    }
-
-    function updateEnv(updates) {
-      const envPath = getEnvPath();
-      let content = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf-8') : '';
-
-      for (const [key, value] of Object.entries(updates)) {
-        if (!value) continue;
-        const regex = new RegExp(`^${key}=.*$`, 'm');
-        if (regex.test(content)) {
-          content = content.replace(regex, `${key}=${value}`);
-        } else {
-          content += `\n${key}=${value}`;
+        for (const [key, value] of Object.entries(updates)) {
+          if (!value) continue;
+          const regex = new RegExp(`^${key}=.*$`, "m");
+          if (regex.test(content)) {
+            content = content.replace(regex, `${key}=${value}`);
+          } else {
+            content += `\n${key}=${value}`;
+          }
         }
+
+        fs.mkdirSync(path.dirname(envPath), { recursive: true });
+        fs.writeFileSync(envPath, content.trim() + "\n", "utf-8");
       }
 
-      fs.mkdirSync(path.dirname(envPath), { recursive: true });
-      fs.writeFileSync(envPath, content.trim() + '\n', 'utf-8');
-    }
+      document.getElementById("form").addEventListener("submit", (e) => {
+        e.preventDefault();
 
-    document.getElementById('form').addEventListener('submit', (e) => {
-      e.preventDefault();
+        const openaiKey = document.getElementById("openaiKey").value.trim();
 
-      const spotifyId     = document.getElementById('spotifyId').value.trim();
-      const spotifySecret = document.getElementById('spotifySecret').value.trim();
-      const youtubeKey    = document.getElementById('youtubeKey').value.trim();
-      const openaiKey     = document.getElementById('openaiKey').value.trim();
+        updateEnv({
+          OPENAI_API_KEY: openaiKey,
+        });
 
-      if (!spotifyId || !spotifySecret || !youtubeKey) {
-        alert('Spotify ID, Secret e YouTube Key são obrigatórios.');
-        return;
-      }
-
-      updateEnv({
-        SPOTIFY_CLIENT_ID:     spotifyId,
-        SPOTIFY_CLIENT_SECRET: spotifySecret,
-        YOUTUBE_API_KEY:       youtubeKey,
-        OPENAI_API_KEY:        openaiKey,
+        ipcRenderer.send("config-saved");
       });
 
-      ipcRenderer.send('config-saved');
-    });
-
-    document.getElementById('skipLink').addEventListener('click', () => {
-      ipcRenderer.send('config-skipped');
-    });
-  </script>
-</body>
+      document.getElementById("skipLink").addEventListener("click", () => {
+        ipcRenderer.send("config-skipped");
+      });
+    </script>
+  </body>
 </html>

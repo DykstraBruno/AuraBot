@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🎵 AuraBot
 
@@ -7,7 +7,7 @@
 Fale o nome da música, o AuraBot toca. Sem terminal, sem configuração técnica.  
 Funciona como o Spotify — você instala e abre.
 
-[![CI](https://github.com/SEU_USER/AuraBot/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU_USER/AuraBot/actions/workflows/ci.yml)
+[![CI](https://github.com/DykstraBruno/AuraBot/actions/workflows/ci.yml/badge.svg)](https://github.com/DykstraBruno/AuraBot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
@@ -37,7 +37,7 @@ Baixe o instalador para o seu sistema:
 | **macOS**   | `AuraBot.dmg`       | ~140 MB |
 | **Linux**   | `AuraBot.AppImage`  | ~130 MB |
 
-> Acesse a [página de releases](https://github.com/SEU_USER/AuraBot/releases/latest) para baixar a versão mais recente.
+> Acesse a [página de releases](https://github.com/DykstraBruno/AuraBot/releases/latest) para baixar a versão mais recente.
 
 ---
 
@@ -244,7 +244,7 @@ aurabot/
 
 ```bash
 # 1. Clonar e instalar
-git clone https://github.com/SEU_USER/AuraBot.git
+git clone https://github.com/DykstraBruno/AuraBot.git
 cd AuraBot
 npm install
 
@@ -347,7 +347,7 @@ Contribuições são bem-vindas! Seja corrigindo bugs, adicionando features ou m
 
 ### Reportar bugs
 
-Encontrou um problema? Abra uma [issue no GitHub](https://github.com/SEU_USER/AuraBot/issues) com:
+Encontrou um problema? Abra uma [issue no GitHub](https://github.com/DykstraBruno/AuraBot/issues) com:
 
 - Descrição clara do bug
 - Passos para reproduzir
@@ -357,7 +357,7 @@ Encontrou um problema? Abra uma [issue no GitHub](https://github.com/SEU_USER/Au
 
 ### Sugerir features
 
-Tem uma ideia legal? Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) ou [issue](https://github.com/SEU_USER/AuraBot/issues) etiquetada como `enhancement`.
+Tem uma ideia legal? Abra uma [discussion](https://github.com/DykstraBruno/AuraBot/discussions) ou [issue](https://github.com/DykstraBruno/AuraBot/issues) etiquetada como `enhancement`.
 
 ### Processo de contribuição
 
@@ -413,7 +413,7 @@ Tem uma ideia legal? Abra uma [discussion](https://github.com/SEU_USER/AuraBot/d
 
 ### Dúvidas?
 
-Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) se tiver dúvidas sobre o processo ou a arquitetura.
+Abra uma [discussion](https://github.com/DykstraBruno/AuraBot/discussions) se tiver dúvidas sobre o processo ou a arquitetura.
 
 ---
 
@@ -422,3 +422,4 @@ Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) se tiver 
 MIT © 2025 — AuraBot Contributors
 
 Veja o arquivo [LICENSE](LICENSE) para detalhes completos.
+
