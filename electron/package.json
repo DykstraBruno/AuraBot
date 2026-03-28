@@ -3,30 +3,27 @@
   "version": "1.0.0",
   "description": "AuraBot — Bot de música controlado por voz",
   "main": "src/main.js",
-  "homepage": "./",
   "author": "AuraBot Contributors",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev":          "electron .",
-    "build:win":    "electron-builder --win",
-    "build:mac":    "electron-builder --mac",
-    "build:linux":  "electron-builder --linux",
-    "build:all":    "electron-builder --win --mac --linux",
-    "postinstall":  "electron-builder install-app-deps"
+    "dev":        "electron .",
+    "build:win":  "electron-builder --win --x64",
+    "build:mac":  "electron-builder --mac",
+    "build:linux":"electron-builder --linux",
+    "postinstall":"electron-builder install-app-deps"
   },
   "dependencies": {
     "electron-is-dev": "^2.0.0"
   },
   "devDependencies": {
-    "electron":           "^28.0.0",
-    "electron-builder":   "^24.9.1"
+    "electron":         "^28.0.0",
+    "electron-builder": "^24.9.1"
   },
   "build": {
     "appId":       "app.aurabot.desktop",
     "productName": "AuraBot",
     "copyright":   "Copyright © 2025 AuraBot Contributors",
-    "icon":        "assets/icon",
 
     "files": [
       "src/**/*",
@@ -35,9 +32,19 @@
 
     "extraResources": [
       {
-        "from":   "../backend",
-        "to":     "backend",
-        "filter": ["**/*", "!node_modules/**", "!src/tests/**", "!coverage/**"]
+        "from":   "../backend/dist",
+        "to":     "backend/dist",
+        "filter": ["**/*.js", "**/*.json"]
+      },
+      {
+        "from":   "../backend/node_modules",
+        "to":     "backend/node_modules",
+        "filter": ["**/*", "!**/*.ts", "!**/test/**", "!**/tests/**", "!**/*.md"]
+      },
+      {
+        "from":   "../backend/prisma",
+        "to":     "backend/prisma",
+        "filter": ["schema.prisma", "migrations/**"]
       },
       {
         "from":   "../frontend/dist",
@@ -49,27 +56,17 @@
       "target": [{ "target": "nsis", "arch": ["x64"] }],
       "icon": "assets/icon.ico"
     },
+
     "nsis": {
-      "oneClick":           false,
+      "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName":       "AuraBot"
-    },
-
-    "mac": {
-      "target":   [{ "target": "dmg", "arch": ["x64", "arm64"] }],
-      "icon":     "assets/icon.icns",
-      "category": "public.app-category.music"
-    },
-    "dmg": {
-      "title": "Instalar AuraBot"
-    },
-
-    "linux": {
-      "target": ["AppImage", "deb"],
-      "icon":   "assets/icon.png",
-      "category": "Audio"
+      "shortcutName": "AuraBot",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "language": "1046"
     },
 
     "publish": null

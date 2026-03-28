@@ -51,7 +51,7 @@ describe('useSingleTab', () => {
     expect(onDuplicate).not.toHaveBeenCalled();
   });
 
-  it('chama onDuplicate quando outra aba ativa existe', () => {
+  it('chama onDuplicate quando outra aba ativa existe', async () => {
     const onDuplicate = vi.fn();
 
     // Simula outra aba ativa (tab diferente, timestamp recente)
@@ -61,10 +61,11 @@ describe('useSingleTab', () => {
     renderHook(() => useSingleTab(onDuplicate));
 
     // Dispara evento de storage como se outra aba atualizasse
-    act(() => {
+    await act(async () => {
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'aurabot_active_tab',
         newValue: otherTab,
+        storageArea: localStorage,
       }));
     });
 

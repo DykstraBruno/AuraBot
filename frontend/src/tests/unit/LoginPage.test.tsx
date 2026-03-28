@@ -16,7 +16,7 @@ const renderLogin = () =>
 
 const getEmailInput = () => screen.getByPlaceholderText(/email\.com/i);
 const getPasswordInput = () => screen.getByPlaceholderText(/••••••••/);
-const getSubmitBtn = () => screen.getByRole('button', { name: /entrar/i });
+const getSubmitBtn = () => screen.getByRole('button', { name: /entrar(do)?/i });
 
 describe('LoginPage', () => {
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('LoginPage', () => {
     await user.click(getSubmitBtn());
 
     await waitFor(() => {
-      expect(screen.getByText('email inválido')).toBeInTheDocument();
+      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
     });
     expect(api.post).not.toHaveBeenCalled();
   });
@@ -163,11 +163,12 @@ describe('LoginPage', () => {
     renderLogin();
     const user = userEvent.setup();
 
-    await user.type(getEmailInput(), 'ruim');
+    // Precisa de '@' para ativar validação de email (sem @ trata como username)
+    await user.type(getEmailInput(), 'nao-e-email@');
     await user.tab(); // blur
 
     await waitFor(() => {
-      expect(screen.getByText('email inválido')).toBeInTheDocument();
+      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
     });
   });
 });

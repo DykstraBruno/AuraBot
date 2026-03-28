@@ -98,7 +98,7 @@ interface SpotifyConnectProps {
   onDeviceReady?: (deviceId: string) => void;
 }
 
-export function SpotifyConnect({ onDeviceReady, onPlay }: SpotifyConnectProps) {
+export function SpotifyConnect({ onDeviceReady }: SpotifyConnectProps) {
   const [status, setStatus] = useState<SpotifyStatus | null>(null);
   const [devices, setDevices] = useState<SpotifyDevice[]>([]);
   const [loading, setLoading] = useState(true);

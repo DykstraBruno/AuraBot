@@ -208,7 +208,7 @@ export default function AppPage() {
               <p style={styles.sectionLabel}>Buscar música</p>
               <div style={{ marginTop: '8px' }}>
                 <SearchBar
-                  onPlay={(q, _s) => handleCommand('play', q)}
+                  
                   onSearch={handleSearch}
                   disabled={isLoading}
                 />
