@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, getApiError } from '../../services/api';
-import { useAuthStore } from '../../store/authStore';
-import { Button, Input, Toast } from '../../components/ui';
+import { api, getApiError } from '../services/api';
+import { useAuthStore } from '../store/authStore';
+import { Button, Input, Toast } from '../components/ui';
 import {
   useFormValidation,
   validateEmailClient,
   validatePasswordClient,
   validateUsernameClient,
-} from '../../hooks/useValidation';
+} from '../hooks/useValidation';
 
 // Indicador de força de senha
 function PasswordStrength({ password }: { password: string }) {

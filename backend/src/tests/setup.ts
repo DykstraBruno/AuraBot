@@ -57,6 +57,11 @@ vi.mock('../config/database', () => ({
       create: vi.fn(),
       findMany: vi.fn(),
     },
+    userPreferences: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
     $transaction: vi.fn((ops: any) =>
       Array.isArray(ops) ? Promise.all(ops) : ops(mockPrismaTransaction)
     ),

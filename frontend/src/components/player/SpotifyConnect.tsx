@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api, getApiError } from '../../services/api';
 import { Button, Spinner, Toast } from '../ui';
 
@@ -96,7 +96,6 @@ function useSpotifyPlayer({ accessToken, onReady, onTrackChange, onError }: UseS
 
 interface SpotifyConnectProps {
   onDeviceReady?: (deviceId: string) => void;
-  onPlay?: (spotifyUri: string, deviceId: string) => void;
 }
 
 export function SpotifyConnect({ onDeviceReady, onPlay }: SpotifyConnectProps) {

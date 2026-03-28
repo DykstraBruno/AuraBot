@@ -12,16 +12,21 @@ export function validateEmailClient(value: string): string | null {
 }
 
 export function validatePasswordClient(value: string): string | null {
-  if (value.length < 8) {
-    return 'A senha deve ter pelo menos 8 caracteres, com ao menos 1 número e 1 letra';
-  }
-  if (!/[0-9]/.test(value)) {
-    return 'A senha deve ter pelo menos 8 caracteres, com ao menos 1 número e 1 letra';
-  }
-  if (!/[a-zA-Z]/.test(value)) {
-    return 'A senha deve ter pelo menos 8 caracteres, com ao menos 1 número e 1 letra';
-  }
+  if (value.length < 8) return 'A senha deve ter ao menos 8 caracteres';
+  if (!/[0-9]/.test(value)) return 'A senha deve ter ao menos 1 número';
+  if (!/[a-zA-Z]/.test(value)) return 'A senha deve ter ao menos 1 letra';
   return null;
+}
+
+/**
+ * Versão simplificada: retorna { valid, message } em vez de string | null
+ * Usada nos testes e no indicador de força de senha
+ */
+export function checkPassword(value: string): { valid: boolean; message: string } {
+  const error = validatePasswordClient(value);
+  return error
+    ? { valid: false, message: error }
+    : { valid: true,  message: 'Senha válida' };
 }
 
 export function validateUsernameClient(value: string): string | null {

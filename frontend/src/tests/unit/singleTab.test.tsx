@@ -5,6 +5,22 @@ import { useSingleTab } from '../../hooks/useSingleTab';
 import { DuplicateTabModal } from '../../components/ui/DuplicateTabModal';
 import { useAuthStore } from '../../store/authStore';
 
+// Mock do Zustand store — simula usuário autenticado por padrão
+const mockLogout = vi.fn();
+vi.mock('../../store/authStore', () => ({
+  useAuthStore: vi.fn((selector?: (s: any) => any) => {
+    const state = {
+      isAuthenticated: true,
+      logout: mockLogout,
+      user: { id: 'user-1', email: 'test@test.com', username: 'testuser' },
+      tokens: null,
+    };
+    // Zustand usa selector pattern: useAuthStore(s => s.isAuthenticated)
+    return typeof selector === 'function' ? selector(state) : state;
+  }),
+}));
+(useAuthStore as any).getState = () => ({ logout: mockLogout });
+
 // ─── useSingleTab ──────────────────────────────────────────────────────────────
 
 describe('useSingleTab', () => {
@@ -39,10 +55,8 @@ describe('useSingleTab', () => {
     const onDuplicate = vi.fn();
 
     // Simula outra aba ativa (tab diferente, timestamp recente)
-    localStorage.setItem('aurabot_active_tab', JSON.stringify({
-      id: 'other-tab-id',
-      ts: Date.now(),
-    }));
+    const otherTab = JSON.stringify({ id: 'other-tab-id', ts: Date.now() });
+    localStorage.setItem('aurabot_active_tab', otherTab);
 
     renderHook(() => useSingleTab(onDuplicate));
 
@@ -50,7 +64,7 @@ describe('useSingleTab', () => {
     act(() => {
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'aurabot_active_tab',
-        newValue: JSON.stringify({ id: 'other-tab-id', ts: Date.now() }),
+        newValue: otherTab,
       }));
     });
 
@@ -72,8 +86,6 @@ describe('useSingleTab', () => {
 
   it('logout em outra aba dispara logout local', () => {
     const onDuplicate = vi.fn();
-    const mockLogout = vi.fn();
-    vi.mocked(useAuthStore).mockReturnValue(mockLogout as any);
 
     renderHook(() => useSingleTab(onDuplicate));
 
@@ -84,8 +96,8 @@ describe('useSingleTab', () => {
       }));
     });
 
-    // O store deve ter recebido chamada de logout
-    expect(useAuthStore.getState).toBeDefined();
+    // getState foi chamado para executar logout
+    expect(mockLogout).toHaveBeenCalled();
   });
 });
 

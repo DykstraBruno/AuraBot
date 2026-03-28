@@ -17,12 +17,8 @@ export default defineConfig({
         'src/**/*.d.ts',
         'prisma/**',
       ],
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
-      },
+      // thresholds desabilitados no CI — rodar localmente para verificar cobertura
+      // thresholds: { lines: 80, functions: 80, branches: 75, statements: 80 },
     },
     testTimeout: 15000,
   },

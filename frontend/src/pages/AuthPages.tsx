@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { api, getApiError } from '../../services/api';
-import { Button, Input, Toast } from '../../components/ui';
-import { validateEmailClient, validatePasswordClient, useFormValidation } from '../../hooks/useValidation';
+import { api, getApiError } from '../services/api';
+import { Button, Input, Toast } from '../components/ui';
+import { validateEmailClient, validatePasswordClient, useFormValidation } from '../hooks/useValidation';
 
 // ─── Forgot Password ──────────────────────────────────────────────────────────
 

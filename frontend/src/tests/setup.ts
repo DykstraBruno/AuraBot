@@ -107,3 +107,16 @@ Object.defineProperty(HTMLMediaElement.prototype, 'play', {
   value: vi.fn().mockResolvedValue(undefined),
   writable: true,
 });
+
+// Mock BroadcastChannel (não disponível em jsdom)
+class BroadcastChannelMock {
+  name: string;
+  onmessage: ((e: MessageEvent) => void) | null = null;
+  constructor(name: string) { this.name = name; }
+  postMessage(_data: unknown) {}
+  close() {}
+  addEventListener() {}
+  removeEventListener() {}
+  dispatchEvent() { return true; }
+}
+(global as any).BroadcastChannel = BroadcastChannelMock;

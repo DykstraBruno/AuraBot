@@ -65,11 +65,11 @@ describe('validatePasswordClient', () => {
   });
 
   it('mensagens são consistentes com o backend', () => {
-    // Regra fundamental: frontend e backend devem mostrar a mesma mensagem
-    const shortResult = validatePasswordClient('Ab1');
-    expect(shortResult).toContain('pelo menos 8 caracteres');
-    expect(shortResult).toContain('ao menos 1 número');
-    expect(shortResult).toContain('ao menos 1 letra');
+    // Regra fundamental: cada regra retorna sua mensagem específica
+    expect(validatePasswordClient('Ab1')).toContain('8 caracteres');       // muito curta
+    expect(validatePasswordClient('abcdefgh')).toContain('ao menos 1 número'); // sem número
+    expect(validatePasswordClient('12345678')).toContain('ao menos 1 letra');  // sem letra
+    expect(validatePasswordClient('Senha123')).toBeNull();                  // válida
   });
 });
 
@@ -106,7 +106,7 @@ describe('validateUsernameClient', () => {
 
 describe('checkPassword', () => {
   it('retorna valid: true para senha correta', () => {
-    expect(checkPassword('Senha123')).toEqual({ valid: true });
+    expect(checkPassword('Senha123')).toEqual({ valid: true, message: 'Senha válida' });
   });
 
   it('retorna valid: false com mensagem para senha fraca', () => {

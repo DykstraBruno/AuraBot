@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useVoiceRecorder, RecordingState } from '../../hooks/useVoiceRecorder';
+import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { Spinner } from '../ui';
 
 // Idiomas suportados com padrões de comando dedicados
@@ -57,7 +57,7 @@ export function VoiceButton({ onAudio, disabled, processingExternal, defaultLang
     if (state === 'recording') {
       autoStopRef.current = setTimeout(async () => {
         const blob = await stop();
-        if (blob) onAudio(blob);
+        if (blob) onAudio(blob, language);
       }, 60_000);
     }
     return () => clearTimeout(autoStopRef.current);
