@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Usuários ────────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  username        String    @unique
+  passwordHash    String
+  displayName     String?
+  avatarUrl       String?
+  isActive        Boolean   @default(true)
+  emailVerified   Boolean   @default(false)
+  loginAttempts   Int       @default(0)
+  lockedUntil     DateTime?
+
+  // OAuth Spotify
+  spotifyId           String?   @unique
+  spotifyAccessToken  String?
+  spotifyRefreshToken String?
+  spotifyTokenExpiry  DateTime?
+
+  // Relações
+  sessions        Session[]
+  passwordResets  PasswordReset[]
+  emailVerifications EmailVerification[]
+  playlists       Playlist[]
+  history         PlayHistory[]
+  preferences     UserPreferences?
+  queue           QueueItem[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// ─── Sessões ─────────────────────────────────────────────────────────────────
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  accessToken  String   @unique
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  platform     String   @default("web")  // web | discord | desktop-win | desktop-mac | desktop-linux
+  expiresAt    DateTime
+  isRevoked    Boolean  @default(false)
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+
+// ─── Reset de senha ───────────────────────────────────────────────────────────
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@map("password_resets")
+}
+
+// ─── Verificação de email ─────────────────────────────────────────────────────
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@map("email_verifications")
+}
+
+// ─── Músicas ──────────────────────────────────────────────────────────────────
+
+model Track {
+  id         String @id @default(cuid())
+  title      String
+  artist     String
+  album      String?
+  duration   Int?
+  coverUrl   String?
+  spotifyId  String? @unique
+  youtubeId  String? @unique
+  previewUrl String?
+
+  playlists  PlaylistTrack[]
+  history    PlayHistory[]
+  queue      QueueItem[]
+
+  createdAt  DateTime @default(now())
+
+  @@map("tracks")
+}
+
+// ─── Fila de reprodução ───────────────────────────────────────────────────────
+
+model QueueItem {
+  id        String   @id @default(cuid())
+  userId    String
+  trackId   String
+  position  Int
+  source    String   // spotify | youtube
+  addedAt   DateTime @default(now())
+  playedAt  DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([userId, position])
+  @@map("queue_items")
+}
+
+// ─── Playlists ────────────────────────────────────────────────────────────────
+
+model Playlist {
+  id          String @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean @default(false)
+  coverUrl    String?
+
+  tracks      PlaylistTrack[]
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  trackId    String
+  position   Int
+  addedAt    DateTime @default(now())
+
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, trackId])
+  @@map("playlist_tracks")
+}
+
+// ─── Histórico ────────────────────────────────────────────────────────────────
+
+model PlayHistory {
+  id       String   @id @default(cuid())
+  userId   String
+  trackId  String
+  source   String
+  platform String
+  playedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("play_history")
+}
+
+// ─── Preferências ─────────────────────────────────────────────────────────────
+
+model UserPreferences {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  preferredSource  String  @default("spotify")
+  audioQuality     String  @default("high")
+  language         String  @default("pt-BR") // pt-BR = preferência de exibição; voice usa 'pt'
+  voiceEnabled     Boolean @default(true)
+  volume           Int     @default(80)
+  discordGuildId   String?
+  discordChannelId String?
+
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}

@@ -1,0 +1,168 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ─── Backend ────────────────────────────────────────────────────────────────
+  backend:
+    name: Backend — Test & Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aurabot_test
+          POSTGRES_PASSWORD: aurabot_test
+          POSTGRES_DB: aurabot_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://aurabot_test:aurabot_test@localhost:5432/aurabot_test
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'junit-placeholder-not-real-ignore' }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'junit-refresh-placeholder-not-real' }}
+      SPOTIFY_CLIENT_ID: test_spotify_id
+      SPOTIFY_CLIENT_SECRET: test_spotify_secret
+      YOUTUBE_API_KEY: test_youtube_key
+      OPENAI_API_KEY: test_openai_key
+      FRONTEND_URL: http://localhost:5173
+      AURABOT_BOT_TOKEN: test_bot_token_for_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # package-lock.json pode não existir antes do primeiro npm install
+      - name: Install dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run database migrations
+        working-directory: backend
+        run: npx prisma migrate deploy
+
+      - name: Run tests
+        working-directory: backend
+        run: npm test
+
+      - name: Build
+        working-directory: backend
+        run: npm run build
+
+  # ─── Frontend ───────────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Build
+        working-directory: frontend
+        env:
+          VITE_API_URL: /api
+        run: npm run build
+
+  # ─── Discord Bot ─────────────────────────────────────────────────────────────
+  discord:
+    name: Discord Bot — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: discord
+        run: npm install
+
+      - name: Run tests
+        working-directory: discord
+        run: npm test
+
+      - name: Build
+        working-directory: discord
+        run: npm run build
+
+  # ─── Electron ────────────────────────────────────────────────────────────────
+  electron:
+    name: Electron — Lint & Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: electron
+        run: npm install
+
+      - name: Check main.js syntax
+        working-directory: electron
+        run: node --check src/main.js && node --check src/preload.js && node --check src/setup.js
+        
+  desktop:
+    name: Desktop — Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Run tests
+        working-directory: desktop
+        run: npm test
+
+      - name: Build
+        working-directory: desktop
+        run: npm run build

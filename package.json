@@ -1,0 +1,44 @@
+{
+  "name": "aurabot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "🎵 AuraBot — Voice-powered music bot for Discord and Desktop",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "discord",
+    "desktop",
+    "electron"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:discord": "npm run dev --workspace=discord",
+    "dev:desktop": "npm run dev --workspace=desktop",
+    "dev:app": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run electron:dev\"",
+    "electron:dev": "wait-on http://localhost:5173 && npm run dev --workspace=electron",
+    "build": "npm run build --workspaces --if-present",
+    "build:app": "npm run build:electron --workspace=frontend && npm run build --workspace=backend && npm run build:win --workspace=electron",
+    "build:app:win": "npm run build:electron --workspace=frontend && npm run build --workspace=backend && npm run build:win --workspace=electron",
+    "build:app:mac": "npm run build:electron --workspace=frontend && npm run build --workspace=backend && npm run build:mac --workspace=electron",
+    "build:app:linux": "npm run build:electron --workspace=frontend && npm run build --workspace=backend && npm run build:linux --workspace=electron",
+    "test": "npm run test --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "discord:deploy": "npm run deploy-commands --workspace=discord"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

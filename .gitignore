@@ -1,0 +1,78 @@
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ─── Build ────────────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# ─── Variáveis de ambiente ────────────────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# mantém os exemplos
+!.env.example
+!.env.*.example
+
+# ─── Cobertura / testes ───────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+
+# ─── Prisma ───────────────────────────────────────────────────────────────────
+# Gerado automaticamente — não versionar
+backend/src/generated/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ─── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*.suo
+*.user
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+.docker/
+
+# ─── Uploads / mídia temporária ──────────────────────────────────────────────
+uploads/
+temp/
+tmp/
+*.tmp
+*.temp
+
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+.cache/
+.parcel-cache/
+.turbo/
+*.bak
+backups/

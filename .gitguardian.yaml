@@ -1,0 +1,13 @@
+# .gitguardian.yaml
+# Ignora falsos positivos do GitGuardian neste repositório.
+# Estes são valores de teste/placeholder, não credenciais reais.
+
+version: 2
+
+ignore-paths:
+  - backend/prisma/seed.ts        # senha do usuário demo
+  - .github/workflows/ci.yml      # variáveis de ambiente de teste do CI
+  - docker-compose.yml            # senhas padrão de desenvolvimento local
+
+ignore-detectors:
+  - generic_password              # senhas de placeholder nos .env.example
