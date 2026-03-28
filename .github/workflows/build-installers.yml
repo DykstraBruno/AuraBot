@@ -1,6 +1,5 @@
 name: Build Installers
 
-# Gera os instaladores (.exe, .dmg, .AppImage) ao criar uma tag v*.*.*
 on:
   push:
     tags:
@@ -13,17 +12,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false  # continua os outros mesmo se um falhar
       matrix:
         include:
           - os: windows-latest
             platform: win
-            artifact: '*.exe'
           - os: macos-latest
             platform: mac
-            artifact: '*.dmg'
           - os: ubuntu-latest
             platform: linux
-            artifact: '*.AppImage'
 
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +30,7 @@ jobs:
         with:
           node-version: '20'
 
+      # ── Backend ──────────────────────────────────────────────────────────────
       - name: Instalar dependências — backend
         working-directory: backend
         run: npm install
@@ -41,6 +39,7 @@ jobs:
         working-directory: backend
         run: npm run build
 
+      # ── Frontend ─────────────────────────────────────────────────────────────
       - name: Instalar dependências — frontend
         working-directory: frontend
         run: npm install
@@ -52,6 +51,7 @@ jobs:
           BUILD_TARGET: electron
           VITE_API_URL: http://localhost:3001/api
 
+      # ── Electron ─────────────────────────────────────────────────────────────
       - name: Instalar dependências — Electron
         working-directory: electron
         run: npm install
@@ -61,53 +61,45 @@ jobs:
         run: npm run build:${{ matrix.platform }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS: desativa assinatura de código (não obrigatório para uso pessoal)
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload instalador
+      # ── Upload ───────────────────────────────────────────────────────────────
+      - name: Upload instaladores
         uses: actions/upload-artifact@v4
         with:
           name: aurabot-${{ matrix.platform }}-${{ github.ref_name }}
-          path: electron/dist/
+          path: |
+            electron/dist/*.exe
+            electron/dist/*.dmg
+            electron/dist/*.AppImage
+            electron/dist/*.deb
+          if-no-files-found: warn
           retention-days: 30
 
-  # Cria a Release com todos os instaladores anexados
-  release:
-    name: Criar Release
+  # ─── Anexar instaladores à Release ───────────────────────────────────────────
+  attach-to-release:
+    name: Anexar instaladores à Release
     runs-on: ubuntu-latest
     needs: build
+    if: always()  # roda mesmo se algum build falhou
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Baixar todos os instaladores
+      - name: Baixar todos os artefatos
         uses: actions/download-artifact@v4
         with:
           path: installers
           merge-multiple: true
+        continue-on-error: true
 
-      - name: Criar GitHub Release
+      - name: Listar arquivos gerados
+        run: find installers -type f 2>/dev/null || echo "Nenhum instalador encontrado"
+
+      - name: Anexar à release
         uses: softprops/action-gh-release@v1
+        if: hashFiles('installers/**') != ''
         with:
-          name: AuraBot ${{ github.ref_name }}
-          body: |
-            ## 🎵 AuraBot ${{ github.ref_name }}
-
-            ### Download
-
-            | Sistema | Arquivo |
-            |---------|---------|
-            | Windows | `AuraBot-Setup-${{ github.ref_name }}.exe` |
-            | macOS   | `AuraBot-${{ github.ref_name }}.dmg` |
-            | Linux   | `AuraBot-${{ github.ref_name }}.AppImage` |
-
-            ### Instalação
-            - **Windows:** baixe o `.exe` e execute como administrador
-            - **macOS:** baixe o `.dmg`, arraste para Aplicativos
-            - **Linux:** baixe o `.AppImage`, dê permissão e execute:
-              ```bash
-              chmod +x AuraBot-*.AppImage
-              ./AuraBot-*.AppImage
-              ```
-          files: installers/**/*
-          draft: false
+          files: installers/**
+        continue-on-error: true

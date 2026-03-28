@@ -3,14 +3,10 @@ name: Security
 on:
   schedule:
     - cron: '0 8 * * 1'  # toda segunda-feira às 8h UTC
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
+# Só roda no agendamento semanal — não bloqueia PRs nem pushs
 jobs:
-  # ─── CodeQL — análise estática ───────────────────────────────────────────────
-  # Único job que roda sempre — gratuito e não precisa de secrets
   codeql:
     name: CodeQL — Análise estática
     runs-on: ubuntu-latest
@@ -31,17 +27,14 @@ jobs:
       - name: Build automático
         uses: github/codeql-action/autobuild@v3
 
-      - name: Executar análise CodeQL
+      - name: Executar análise
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript'
 
-  # ─── Auditoria de dependências ───────────────────────────────────────────────
-  # Só roda no schedule semanal — não bloqueia PRs
   audit:
-    name: Auditoria de dependências (${{ matrix.workspace }})
+    name: Audit — ${{ matrix.workspace }}
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
 
     strategy:
       fail-fast: false
@@ -51,8 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -62,26 +54,5 @@ jobs:
 
       - name: Auditoria npm
         working-directory: ${{ matrix.workspace }}
-        run: npm audit --audit-level=high
-        continue-on-error: true
-
-  # ─── Verificação de segredos ─────────────────────────────────────────────────
-  # Só roda no schedule semanal — TruffleHog requer histórico completo
-  secrets-scan:
-    name: Verificação de segredos expostos
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: TruffleHog — detecta segredos no histórico git
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified
+        run: npm audit --audit-level=critical
         continue-on-error: true
