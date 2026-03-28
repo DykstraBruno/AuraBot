@@ -133,13 +133,13 @@ export class VoiceService {
     });
 
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
+      const body = (await res.json().catch(() => ({}))) as any;
       if (res.status === 400) throw new AppError(MESSAGES[language].emptyAudio, 400, 'INVALID_AUDIO');
       if (res.status === 429) throw new ExternalAPIError('OpenAI', 'Limite de requisições atingido. Tente novamente em alguns segundos.');
       throw new ExternalAPIError('OpenAI', body.error?.message ?? `HTTP ${res.status}`);
     }
 
-    const data = await res.json();
+    const data = await res.json() as any;
 
     if (!data.text?.trim()) {
       throw new AppError(MESSAGES[language].emptyAudio, 400, 'EMPTY_TRANSCRIPTION');

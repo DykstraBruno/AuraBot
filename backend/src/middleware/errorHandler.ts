@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError, ValidationError, AccountLockedError } from '../utils/errors';
 import { logger } from '../utils/logger';
-import { Prisma } from '@prisma/client';
+// Verificação de erros do Prisma via duck typing (não depende do client gerado)
 
 export function errorHandler(
   err: Error,
@@ -41,21 +41,20 @@ export function errorHandler(
     });
   }
 
-  // Erros do Prisma
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === 'P2002') {
-      const field = (err.meta?.target as string[])?.join(', ') || 'campo';
-      return res.status(409).json({
-        success: false,
-        error: { code: 'CONFLICT', message: `Já existe um registro com este ${field}` },
-      });
-    }
-    if (err.code === 'P2025') {
-      return res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Registro não encontrado' },
-      });
-    }
+  // Erros do Prisma (duck typing — funciona sem o client gerado)
+  const prismaErr = err as any;
+  if (prismaErr?.code === 'P2002') {
+    const field = (prismaErr.meta?.target as string[])?.join(', ') || 'campo';
+    return res.status(409).json({
+      success: false,
+      error: { code: 'CONFLICT', message: `Já existe um registro com este ${field}` },
+    });
+  }
+  if (prismaErr?.code === 'P2025') {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: 'Registro não encontrado' },
+    });
   }
 
   // Erro genérico — não expõe detalhes em produção

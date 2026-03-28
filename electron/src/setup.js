@@ -5,45 +5,71 @@ const fs       = require('fs');
 
 /**
  * Executado na primeira vez que o app abre.
- * Gera JWT secrets automaticamente e cria o arquivo .env
- * no diretório de dados do usuário.
+ * - Gera JWT secrets automaticamente
+ * - Configura DATABASE_URL para SQLite local
+ * - Cria o arquivo .env no diretório do usuário
  */
 function setupFirstRun() {
   const userDataPath = app.getPath('userData');
   const envPath      = path.join(userDataPath, '.env');
-  const examplePath  = path.join(__dirname, '..', '.env.example');
 
-  // Garante que o diretório existe
   fs.mkdirSync(userDataPath, { recursive: true });
 
-  // Se já existe .env, não sobrescreve
+  // Ler .env existente ou começar do zero
+  let vars = {};
   if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, 'utf-8');
-    // Verifica se os secrets já foram gerados
-    if (!content.includes('JWT_SECRET=\n') && content.includes('JWT_SECRET=')) {
-      return; // tudo ok
-    }
+    fs.readFileSync(envPath, 'utf-8').split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const idx = trimmed.indexOf('=');
+      if (idx < 0) return;
+      vars[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+    });
   }
 
-  // Gera secrets aleatórios
-  const jwtSecret        = crypto.randomBytes(64).toString('base64');
-  const jwtRefreshSecret = crypto.randomBytes(64).toString('base64');
+  let changed = false;
 
-  // Lê o template
-  let template = fs.existsSync(examplePath)
-    ? fs.readFileSync(examplePath, 'utf-8')
-    : '';
+  // Gerar JWT secrets se não existirem
+  if (!vars['JWT_SECRET'] || vars['JWT_SECRET'].length < 20) {
+    vars['JWT_SECRET'] = crypto.randomBytes(64).toString('base64');
+    changed = true;
+  }
+  if (!vars['JWT_REFRESH_SECRET'] || vars['JWT_REFRESH_SECRET'].length < 20) {
+    vars['JWT_REFRESH_SECRET'] = crypto.randomBytes(64).toString('base64');
+    changed = true;
+  }
 
-  // Substitui os placeholders pelos secrets gerados
-  template = template
-    .replace('JWT_SECRET=',         `JWT_SECRET=${jwtSecret}`)
-    .replace('JWT_REFRESH_SECRET=', `JWT_REFRESH_SECRET=${jwtRefreshSecret}`)
-    .replace('DATABASE_URL=file:./aurabot.db',
-             `DATABASE_URL=file:${path.join(userDataPath, 'aurabot.db').replace(/\\/g, '/')}`);
+  // Configurar DATABASE_URL para SQLite local
+  const dbPath = path.join(userDataPath, 'aurabot.db').replace(/\\/g, '/');
+  const expectedUrl = `file:${dbPath}`;
+  if (vars['DATABASE_URL'] !== expectedUrl) {
+    vars['DATABASE_URL'] = expectedUrl;
+    changed = true;
+  }
 
-  fs.writeFileSync(envPath, template, 'utf-8');
-  console.log('[setup] .env criado em:', envPath);
-  console.log('[setup] JWT secrets gerados automaticamente');
+  // Defaults necessários
+  const defaults = {
+    NODE_ENV:          'production',
+    PORT:              '3001',
+    FRONTEND_URL:      'http://localhost:3001',
+    ALLOWED_ORIGINS:   'http://localhost:3001',
+    LOG_LEVEL:         'error',
+    JWT_EXPIRES_IN:    '15m',
+    JWT_REFRESH_EXPIRES_IN: '7d',
+  };
+
+  for (const [k, v] of Object.entries(defaults)) {
+    if (!vars[k]) { vars[k] = v; changed = true; }
+  }
+
+  // Salvar .env se houve mudanças
+  if (changed) {
+    const content = Object.entries(vars)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('\n') + '\n';
+    fs.writeFileSync(envPath, content, 'utf-8');
+    console.log('[setup] .env criado/atualizado em:', envPath);
+  }
 }
 
 module.exports = { setupFirstRun };

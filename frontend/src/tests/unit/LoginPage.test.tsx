@@ -44,11 +44,19 @@ describe('LoginPage', () => {
     renderLogin();
     const user = userEvent.setup();
 
-    await user.type(getEmailInput(), 'nao-e-email');
+    // 'nao-e-email' sem @ é tratado como username (sem validação de formato)
+    // Com @ mas formato inválido ativa o validateEmailClient
+    await user.type(getEmailInput(), 'invalido@');
     await user.click(getSubmitBtn());
 
     await waitFor(() => {
-      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
+      // O Input renderiza <p><span>⚠</span> email inválido</p>
+      // Usar getAllByText e pegar o elemento mais específico
+      const els = screen.getAllByText((_, element) =>
+        element?.tagName === 'P' &&
+        (element?.textContent?.toLowerCase().includes('email inválido') ?? false)
+      );
+      expect(els.length).toBeGreaterThan(0);
     });
     expect(api.post).not.toHaveBeenCalled();
   });
@@ -137,10 +145,18 @@ describe('LoginPage', () => {
 
     await user.type(getEmailInput(), 'test@test.com');
     await user.type(getPasswordInput(), 'Senha123');
-    await user.click(getSubmitBtn());
+
+    // Clicar no botão — durante loading o texto muda para "Entrando..."
+    const btn = getSubmitBtn();
+    await user.click(btn);
 
     await waitFor(() => {
-      expect(getSubmitBtn()).toBeDisabled();
+      // Durante loading o botão fica disabled (prop loading=true no Button)
+      const buttons = screen.getAllByRole('button');
+      const submitBtn = buttons.find(b => 
+        b.textContent?.includes('Entrar') || b.textContent?.includes('Entrando')
+      );
+      expect(submitBtn).toBeDisabled();
     });
   });
 
@@ -168,7 +184,11 @@ describe('LoginPage', () => {
     await user.tab(); // blur
 
     await waitFor(() => {
-      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
+      const els = screen.getAllByText((_, element) =>
+        element?.tagName === 'P' &&
+        (element?.textContent?.toLowerCase().includes('email inválido') ?? false)
+      );
+      expect(els.length).toBeGreaterThan(0);
     });
   });
 });

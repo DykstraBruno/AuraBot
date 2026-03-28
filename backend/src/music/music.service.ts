@@ -112,7 +112,7 @@ export class MusicService {
       throw new ExternalAPIError('Spotify', `Busca falhou: ${res.status} ${res.statusText}`);
     }
 
-    const data = await res.json();
+    const data = await res.json() as any;
     const tracks: SpotifyTrack[] = data.tracks?.items ?? [];
 
     return tracks
@@ -150,7 +150,7 @@ export class MusicService {
 
     if (!res.ok) {
       if (res.status === 403) {
-        const body = await res.json().catch(() => ({}));
+        const body = (await res.json().catch(() => ({}))) as any;
         const reason = body.error?.errors?.[0]?.reason;
         if (reason === 'quotaExceeded') {
           throw new ExternalAPIError('YouTube', 'Cota diária da API atingida');
@@ -160,7 +160,7 @@ export class MusicService {
       throw new ExternalAPIError('YouTube', `Busca falhou: ${res.status}`);
     }
 
-    const data = await res.json();
+    const data = await res.json() as any;
     const items: YouTubeSearchItem[] = data.items ?? [];
 
     return items
@@ -250,7 +250,7 @@ export class MusicService {
       throw new ExternalAPIError('Spotify', 'Falha ao obter token de acesso');
     }
 
-    const data = await res.json();
+    const data = await res.json() as any;
     this.spotifyToken = data.access_token;
     // Expira 60s antes para evitar race condition
     this.spotifyTokenExpiry = new Date(Date.now() + (data.expires_in - 60) * 1000);

@@ -243,7 +243,7 @@ export class QueueService {
     return {
       userId,
       current: current ? this.toQueueTrack(current) : null,
-      queue: rest.map(i => this.toQueueTrack(i)),
+      queue: rest.map((i: typeof items[0]) => this.toQueueTrack(i)),
       isPlaying: !!current,
       volume: prefs?.volume ?? 80,
     };

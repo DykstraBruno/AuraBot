@@ -281,7 +281,7 @@ export class SpotifyOAuthService {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return [];
-    const data = await res.json();
+    const data = await res.json() as any;
     return data.devices ?? [];
   }
 
@@ -309,11 +309,11 @@ export class SpotifyOAuthService {
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
+      const err = (await res.json().catch(() => ({}))) as any;
       throw new ExternalAPIError('Spotify', `OAuth falhou: ${err.error_description ?? res.status}`);
     }
 
-    const data = await res.json();
+    const data = await res.json() as any;
     return {
       accessToken:  data.access_token,
       refreshToken: data.refresh_token ?? extra.refresh_token ?? '',
@@ -326,7 +326,7 @@ export class SpotifyOAuthService {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) throw new ExternalAPIError('Spotify', 'Falha ao buscar perfil');
-    return res.json();
+    return res.json() as any;
   }
 }
 

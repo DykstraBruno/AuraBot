@@ -26,11 +26,11 @@ vi.mock('../../store/authStore', () => ({
 describe('useSingleTab', () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.useFakeTimers();
+    // Não usar fake timers — interfere com os eventos de storage
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('reivindica a aba ao montar quando autenticado', () => {
@@ -54,19 +54,24 @@ describe('useSingleTab', () => {
   it('chama onDuplicate quando outra aba ativa existe', async () => {
     const onDuplicate = vi.fn();
 
-    // Simula outra aba ativa (tab diferente, timestamp recente)
-    const otherTab = JSON.stringify({ id: 'other-tab-id', ts: Date.now() });
-    localStorage.setItem('aurabot_active_tab', otherTab);
-
+    // Monta o hook primeiro (vai reivindicar a aba com seu tabId)
     renderHook(() => useSingleTab(onDuplicate));
 
-    // Dispara evento de storage como se outra aba atualizasse
+    // Agora OUTRA ABA substitui o localStorage com o ID dela (timestamp recente)
+    // e dispara o evento de storage (que é como o browser notifica outras abas)
+    const otherTab = JSON.stringify({ id: 'other-tab-id', ts: Date.now() });
+
     await act(async () => {
+      // Simula outra aba escrevendo no localStorage e disparando o evento
+      localStorage.setItem('aurabot_active_tab', otherTab);
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'aurabot_active_tab',
         newValue: otherTab,
+        oldValue: null,
         storageArea: localStorage,
+        url: window.location.href,
       }));
+      await new Promise(r => setTimeout(r, 50));
     });
 
     expect(onDuplicate).toHaveBeenCalled();

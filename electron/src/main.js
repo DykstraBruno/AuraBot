@@ -26,30 +26,50 @@ const FRONTEND_URL = isDev
 // Em produção, o electron-builder empacota o node.exe junto com o app
 
 function findNodeExecutable() {
-  // Locais comuns onde o Node.js é instalado no Windows
+  const { execSync } = require('child_process');
+  const isWin = process.platform === 'win32';
+
+  // Tentar localizar via 'where' (Windows) ou 'which' (Unix)
+  try {
+    const cmd = isWin ? 'where node' : 'which node';
+    const result = execSync(cmd, { encoding: 'utf-8', timeout: 3000 }).trim();
+    // 'where' pode retornar múltiplas linhas — pegar a primeira
+    const first = result.split('\n')[0].trim();
+    if (first && fs.existsSync(first)) {
+      console.log('[main] Node encontrado via where/which:', first);
+      return first;
+    }
+  } catch {}
+
+  // Caminhos fixos comuns no Windows
   const winPaths = [
-    // PATH do sistema (funciona se Node.js está instalado)
-    'node.exe',
-    // Instalações padrão do Node.js no Windows
-    path.join(process.env.ProgramFiles || 'C:\Program Files', 'nodejs', 'node.exe'),
-    path.join(process.env['ProgramFiles(x86)'] || 'C:\Program Files (x86)', 'nodejs', 'node.exe'),
-    path.join(process.env.APPDATA || '', '..', 'Local', 'Programs', 'node', 'node.exe'),
+    path.join('C:\Program Files', 'nodejs', 'node.exe'),
+    path.join('C:\Program Files (x86)', 'nodejs', 'node.exe'),
+    path.join(process.env.APPDATA || '', '..', 'Local', 'Programs', 'nodejs', 'node.exe'),
+    path.join(process.env.LOCALAPPDATA || '', 'Programs', 'nodejs', 'node.exe'),
     // NVM para Windows
-    path.join(process.env.NVM_HOME || '', 'node.exe'),
+    path.join(process.env.NVM_HOME || 'C:\nvm', 'node.exe'),
   ];
 
-  const unixPaths = ['node', '/usr/bin/node', '/usr/local/bin/node'];
+  const unixPaths = [
+    '/usr/local/bin/node',
+    '/usr/bin/node',
+    '/opt/homebrew/bin/node',
+  ];
 
-  const candidates = process.platform === 'win32' ? winPaths : unixPaths;
-
+  const candidates = isWin ? winPaths : unixPaths;
   for (const candidate of candidates) {
     try {
-      if (candidate === 'node.exe' || candidate === 'node') return candidate;
-      if (fs.existsSync(candidate)) return candidate;
+      if (fs.existsSync(candidate)) {
+        console.log('[main] Node encontrado em:', candidate);
+        return candidate;
+      }
     } catch {}
   }
 
-  return process.platform === 'win32' ? 'node.exe' : 'node';
+  // Último recurso: usar PATH do sistema via shell
+  console.warn('[main] Node não encontrado em caminhos padrão, usando PATH');
+  return isWin ? 'node.exe' : 'node';
 }
 
 // ─── Estado global ────────────────────────────────────────────────────────────
@@ -89,10 +109,12 @@ function startBackend() {
         ...process.env,
         NODE_ENV:  'production',
         PORT:      String(API_PORT),
+        PATH:      process.env.PATH, // garante que o PATH seja herdado
         ...userEnv,
       },
-      shell: false,
-      windowsHide: true, // esconde a janela do cmd no Windows
+      // shell: true permite que o Windows resolva 'node.exe' via PATH
+      shell: process.platform === 'win32',
+      windowsHide: true,
     });
 
     backendProc.stdout?.on('data', d => {
@@ -265,6 +287,45 @@ function openConfigScreen() {
   });
 }
 
+
+// ─── Rodar migrations do Prisma ───────────────────────────────────────────────
+
+function runMigrations() {
+  return new Promise((resolve, reject) => {
+    const nodeExe  = findNodeExecutable();
+    const envFile  = path.join(app.getPath('userData'), '.env');
+    const userEnv  = loadEnvFile(envFile);
+    const prismaDir = path.join(BACKEND_DIR, 'node_modules', '.bin');
+    const prismaExe = path.join(prismaDir, process.platform === 'win32' ? 'prisma.cmd' : 'prisma');
+
+    const proc = spawn(prismaExe, ['migrate', 'deploy'], {
+      cwd: BACKEND_DIR,
+      env: { ...process.env, ...userEnv },
+      shell: true,
+      windowsHide: true,
+    });
+
+    proc.stdout?.on('data', d => console.log('[migrations]', d.toString().trim()));
+    proc.stderr?.on('data', d => console.error('[migrations]', d.toString().trim()));
+
+    proc.on('close', code => {
+      if (code === 0 || code === null) {
+        console.log('[migrations] Concluído');
+        resolve();
+      } else {
+        // Migrations falhando não deve impedir o app de abrir
+        console.warn('[migrations] Aviso: exit code', code);
+        resolve();
+      }
+    });
+
+    proc.on('error', err => {
+      console.warn('[migrations] Erro (ignorado):', err.message);
+      resolve(); // não bloqueia
+    });
+  });
+}
+
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
 app.whenReady().then(async () => {
@@ -277,7 +338,11 @@ app.whenReady().then(async () => {
       await openConfigScreen();
     }
 
-    // 3. Inicia o backend Node.js em segundo plano
+    // 3. Rodar migrations do banco (cria tabelas no SQLite se não existirem)
+    console.log('[main] Rodando migrations do banco...');
+    await runMigrations();
+
+    // 4. Inicia o backend Node.js em segundo plano
     console.log('[main] Iniciando backend...');
 
     const splash = createSplash();
