@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SpotifyOAuthService } from '../../spotify/spotify.service';
-import { prisma } from '../../config/database';
-import { AppError, ExternalAPIError } from '../../utils/errors';
+import { SpotifyOAuthService } from '../../../spotify/spotify.service';
+import { prisma } from '../../../config/database';
+import { AppError, ExternalAPIError } from '../../../utils/errors';
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { VoiceService } from '../../voice/voice.service';
-import { queueService } from '../../queue/queue.service';
-import { AppError, ExternalAPIError } from '../../utils/errors';
+import { VoiceService } from '../../../voice/voice.service';
+import { queueService } from '../../../queue/queue.service';
+import { AppError, ExternalAPIError } from '../../../utils/errors';
 
 vi.mock('../../queue/queue.service', () => ({
   queueService: { dispatch: vi.fn() },

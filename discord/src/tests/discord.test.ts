@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AuraBotApiClient } from '../src/utils/apiClient';
-import { buildTrackEmbed, buildErrorEmbed, buildVolumeEmbed, buildQueueEmbed } from '../src/utils/embeds';
+import { AuraBotApiClient } from '../utils/apiClient';
+import { buildTrackEmbed, buildErrorEmbed, buildVolumeEmbed, buildQueueEmbed } from '../utils/embeds';
 
 // ─── Mock axios ───────────────────────────────────────────────────────────────
 vi.mock('axios', async () => {

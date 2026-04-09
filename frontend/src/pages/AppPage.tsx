@@ -95,6 +95,10 @@ export default function AppPage() {
     }
   }, []);
 
+  const handlePlay = useCallback((query: string, _source: MusicSource) => {
+    handleCommand('play', query);
+  }, [handleCommand]);
+
   // ─── Comando de voz ───────────────────────────────────────────────────────
   const handleVoiceAudio = useCallback(async (blob: Blob, language: 'pt' | 'en' = 'pt') => {
     setVoiceProcessing(true);
@@ -208,7 +212,7 @@ export default function AppPage() {
               <p style={styles.sectionLabel}>Buscar música</p>
               <div style={{ marginTop: '8px' }}>
                 <SearchBar
-                  
+                  onPlay={handlePlay}
                   onSearch={handleSearch}
                   disabled={isLoading}
                 />

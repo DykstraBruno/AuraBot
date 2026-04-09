@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CrossPlatformPlayer, detectPlatform } from '../src/audio/player';
+import { CrossPlatformPlayer, detectPlatform } from '../audio/player';
 
 // ─── Mock child_process ───────────────────────────────────────────────────────
 

@@ -4,8 +4,8 @@ import {
   verifyAccessToken,
   verifyRefreshToken,
   generateResetToken,
-} from '../../utils/jwt';
-import { AppError } from '../../utils/errors';
+} from '../../../utils/jwt';
+import { AppError } from '../../../utils/errors';
 
 const VALID_PAYLOAD = {
   userId: 'user-123',

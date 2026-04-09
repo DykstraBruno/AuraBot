@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MusicService } from '../../music/music.service';
-import { prisma } from '../../config/database';
-import { ExternalAPIError } from '../../utils/errors';
+import { MusicService } from '../../../music/music.service';
+import { prisma } from '../../../config/database';
+import { ExternalAPIError } from '../../../utils/errors';
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
