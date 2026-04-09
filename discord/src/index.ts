@@ -8,9 +8,10 @@ import {
   AutocompleteInteraction,
   ButtonInteraction,
   InteractionType,
+  EmbedBuilder,
 } from 'discord.js';
-import { AuraBotApiClient } from './utils/apiClient';
-import { buildErrorEmbed, buildNextEmbed, buildStopEmbed, buildQueueEmbed } from './utils/embeds';
+import * as voiceManager from './voice/voiceManager';
+import { buildErrorEmbed } from './utils/embeds';
 
 // ─── Comandos ─────────────────────────────────────────────────────────────────
 import { data as playData, execute as playExecute, autocomplete as playAutocomplete } from './commands/play';
@@ -24,19 +25,13 @@ import {
 
 // ─── Configuração ─────────────────────────────────────────────────────────────
 
-const TOKEN    = process.env.DISCORD_TOKEN!;
+const TOKEN     = process.env.DISCORD_TOKEN!;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID!;
-const API_URL  = process.env.AURABOT_API_URL ?? 'http://localhost:3001/api';
-const BOT_TOKEN = process.env.AURABOT_BOT_TOKEN!;
 
-if (!TOKEN || !CLIENT_ID || !BOT_TOKEN) {
-  console.error('❌ Variáveis de ambiente ausentes: DISCORD_TOKEN, DISCORD_CLIENT_ID, AURABOT_BOT_TOKEN');
+if (!TOKEN || !CLIENT_ID) {
+  console.error('❌ Variáveis de ambiente ausentes: DISCORD_TOKEN, DISCORD_CLIENT_ID');
   process.exit(1);
 }
-
-// ─── Cliente da API AuraBot ───────────────────────────────────────────────────
-
-const apiClient = new AuraBotApiClient(API_URL, BOT_TOKEN);
 
 // ─── Mapa de comandos ─────────────────────────────────────────────────────────
 
@@ -71,13 +66,20 @@ client.once(Events.ClientReady, (c) => {
 // ─── Evento: slash commands + botões + autocomplete ───────────────────────────
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  // Descarta interações já expiradas (Discord dá apenas 3s para responder)
+  const age = Date.now() - interaction.createdTimestamp;
+  if (age > 2500 && interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
+    console.warn(`[Discord] Interação expirada descartada (${age}ms): ${interaction.id}`);
+    return;
+  }
+
   try {
     // ── Autocomplete ─────────────────────────────────────────────────────────
     if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
       const auto = interaction as AutocompleteInteraction;
       const cmd  = commands.get(auto.commandName);
       if (cmd && 'autocomplete' in cmd && cmd.autocomplete) {
-        await cmd.autocomplete(auto, apiClient);
+        await cmd.autocomplete(auto);
       }
       return;
     }
@@ -86,53 +88,58 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isChatInputCommand()) {
       const cmd = commands.get(interaction.commandName);
       if (!cmd) return;
-      await cmd.execute(interaction as ChatInputCommandInteraction, apiClient);
+      await cmd.execute(interaction as ChatInputCommandInteraction);
       return;
     }
 
-    // ── Botões inline (reply rápido do /play) ─────────────────────────────────
+    // ── Botões inline ─────────────────────────────────────────────────────────
     if (interaction.isButton()) {
       const btn = interaction as ButtonInteraction;
+      const guildId = btn.guildId!;
 
       if (btn.customId === 'btn_next') {
-        await btn.deferUpdate();
-        const result = await apiClient.next(btn.user.id);
-        await btn.followUp({ embeds: [buildNextEmbed(result)], ephemeral: false });
+        try { await btn.deferUpdate(); } catch (e: any) { if (e.code === 10062) return; throw e; }
+        const next = voiceManager.skip(guildId);
+        const desc = next ? `A tocar: **${next.title}**` : '📭 Fila vazia.';
+        await btn.followUp({ embeds: [new EmbedBuilder().setColor(0xF5A820).setTitle('⏭ Próxima').setDescription(desc)], ephemeral: false });
         return;
       }
 
       if (btn.customId === 'btn_stop') {
-        await btn.deferUpdate();
-        const result = await apiClient.stop(btn.user.id);
-        await btn.followUp({ embeds: [buildStopEmbed(result.message)], ephemeral: false });
+        try { await btn.deferUpdate(); } catch (e: any) { if (e.code === 10062) return; throw e; }
+        voiceManager.stop(guildId);
+        await btn.followUp({ embeds: [new EmbedBuilder().setColor(0x8A8880).setTitle('⏹ Parado').setDescription('Reprodução encerrada.')], ephemeral: false });
         return;
       }
 
       if (btn.customId === 'btn_queue') {
-        await btn.deferReply({ ephemeral: true });
-        const state = await apiClient.getQueue(btn.user.id);
-        await btn.editReply({ embeds: [buildQueueEmbed(state)] });
+        try { await btn.deferReply({ flags: 64 }); } catch (e: any) { if (e.code === 10062) return; throw e; }
+        const state = voiceManager.getState(guildId);
+        const embed = new EmbedBuilder().setColor(0x5294E0).setTitle('🎵 Fila');
+        if (!state?.current) {
+          embed.setDescription('Nenhuma música tocando.');
+        } else {
+          embed.setDescription(`▶ **${state.current.title}** — ${state.current.artist}`);
+          if (state.queue.length > 0) {
+            embed.addFields({ name: `📋 Na fila (${state.queue.length})`, value: state.queue.slice(0, 10).map((t, i) => `\`${i + 2}.\` ${t.title}`).join('\n') });
+          }
+        }
+        await btn.editReply({ embeds: [embed] });
         return;
       }
     }
   } catch (err: any) {
-    console.error('[Discord] Erro ao processar interação:', err);
-
-    const reply = { embeds: [buildErrorEmbed(err.message ?? 'Ocorreu um erro inesperado.')], ephemeral: true };
-
+    console.error('[Discord] Erro ao processar interação:', err.message);
     try {
+      const reply = { embeds: [buildErrorEmbed(err.message ?? 'Ocorreu um erro inesperado.')] };
       if ('deferred' in interaction && interaction.deferred) {
         await (interaction as any).editReply(reply);
       } else if ('replied' in interaction && !(interaction as any).replied) {
-        await (interaction as any).reply(reply);
+        await (interaction as any).reply({ ...reply, flags: 64 });
       }
     } catch { /* ignora erro secundário */ }
   }
 });
-
-// ─── Deploy de slash commands ─────────────────────────────────────────────────
-// Executado separadamente via: npm run discord:deploy
-// Arquivo: src/deploy-commands.ts
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
