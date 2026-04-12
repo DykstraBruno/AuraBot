@@ -101,10 +101,12 @@ describe('MusicService', () => {
     });
 
     it('combina resultados de ambas as APIs quando source="all"', async () => {
+      // Ordem real de chamadas em Promise.all([searchSpotify, searchYouTube]):
+      // 1. fetch(spotify/token)    2. fetch(youtube/search)    3. fetch(spotify/search)
       mockFetch
         .mockResolvedValueOnce(makeSpotifyTokenResponse())
-        .mockResolvedValueOnce(makeSpotifyResponse())
-        .mockResolvedValueOnce(makeYouTubeResponse());
+        .mockResolvedValueOnce(makeYouTubeResponse())
+        .mockResolvedValueOnce(makeSpotifyResponse());
 
       const results = await service.search('Bohemian Rhapsody', 'all');
       expect(results.length).toBeGreaterThanOrEqual(2);
@@ -124,10 +126,11 @@ describe('MusicService', () => {
     });
 
     it('retorna resultados parciais se uma API falhar', async () => {
+      // Ordem real: 1. token, 2. youtube (falha), 3. spotify search (sucesso)
       mockFetch
         .mockResolvedValueOnce(makeSpotifyTokenResponse())
-        .mockResolvedValueOnce(makeSpotifyResponse())
-        .mockRejectedValueOnce(new Error('YouTube offline')); // YouTube falha
+        .mockRejectedValueOnce(new Error('YouTube offline')) // YouTube é o 2º fetch
+        .mockResolvedValueOnce(makeSpotifyResponse());       // Spotify search é o 3º
 
       const results = await service.search('Bohemian Rhapsody', 'all');
       expect(results.length).toBeGreaterThan(0);

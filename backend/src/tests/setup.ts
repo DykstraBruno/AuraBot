@@ -11,6 +11,13 @@ process.env.SMTP_HOST = '';
 process.env.SMTP_USER = '';
 process.env.SMTP_PASS = '';
 
+// APIs externas — valores fictícios para que os serviços passem da checagem
+// de configuração e cheguem ao fetch mockado nos testes unitários
+process.env.SPOTIFY_CLIENT_ID     = 'test-spotify-client-id';
+process.env.SPOTIFY_CLIENT_SECRET = 'test-spotify-client-secret';
+process.env.YOUTUBE_API_KEY       = 'test-youtube-api-key';
+process.env.OPENAI_API_KEY        = 'test-openai-api-key';
+
 // ─── Mock Prisma ──────────────────────────────────────────────────────────────
 vi.mock('../config/database', () => ({
   prisma: {

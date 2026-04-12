@@ -37,41 +37,6 @@ vi.mock('../services/api', () => ({
   getFieldError: vi.fn(),
 }));
 
-// ─── Mock do zustand stores ───────────────────────────────────────────────────
-vi.mock('../store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => {
-    const state = {
-      user: { id: 'u1', email: 'test@test.com', username: 'testuser', displayName: 'Test', avatarUrl: null, emailVerified: false },
-      tokens: { accessToken: 'access-token', refreshToken: 'refresh-token', expiresIn: 900 },
-      isAuthenticated: true,
-      setAuth: vi.fn(),
-      setTokens: vi.fn(),
-      logout: vi.fn(),
-    };
-    return selector ? selector(state) : state;
-  }),
-}));
-
-vi.mock('../store/playerStore', () => ({
-  usePlayerStore: vi.fn((selector) => {
-    const state = {
-      current: null,
-      queue: [],
-      isPlaying: false,
-      volume: 80,
-      isLoading: false,
-      lastMessage: null,
-      setQueueState: vi.fn(),
-      setLoading: vi.fn(),
-      setMessage: vi.fn(),
-      setCurrent: vi.fn(),
-      setVolume: vi.fn(),
-      setPlaying: vi.fn(),
-    };
-    return selector ? selector(state) : state;
-  }),
-}));
-
 // ─── Mock MediaRecorder + getUserMedia ────────────────────────────────────────
 const mockStop = vi.fn();
 const mockStart = vi.fn();

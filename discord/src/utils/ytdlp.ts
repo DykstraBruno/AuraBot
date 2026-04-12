@@ -1,27 +1,37 @@
 import { spawn } from 'child_process';
-import path from 'path';
 
-// ─── Paths dos binários ────────────────────────────────────────────────────────
+// ─── Resolução de binários (cross-platform) ───────────────────────────────────
+//
+// Prioridade:
+//   1. Variável de ambiente YTDLP_EXE / FFMPEG_EXE (configurável em qualquer SO)
+//   2. Caminho WinGet padrão do Windows (retrocompatibilidade)
+//   3. Nome do binário puro — depende do PATH do sistema
 
-const WINGET_BASE = path.join(
-  process.env.LOCALAPPDATA ?? 'C:/Users/dykst/AppData/Local',
-  'Microsoft/WinGet/Packages'
-);
+function resolveWinGetPath(pkg: string, subPath: string): string {
+  const base = process.env.LOCALAPPDATA ?? 'C:/Users/dykst/AppData/Local';
+  return `${base}/Microsoft/WinGet/Packages/${pkg}/${subPath}`;
+}
 
-export const FFMPEG_BIN = path.join(
-  WINGET_BASE,
-  'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1-full_build/bin'
-);
+export const YTDLP_EXE: string =
+  process.env.YTDLP_EXE ??
+  resolveWinGetPath(
+    'yt-dlp.yt-dlp_Microsoft.Winget.Source_8wekyb3d8bbwe',
+    'yt-dlp.exe'
+  );
 
-export const FFMPEG_EXE = path.join(FFMPEG_BIN, 'ffmpeg.exe');
+export const FFMPEG_BIN: string =
+  process.env.FFMPEG_BIN ??
+  resolveWinGetPath(
+    'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe',
+    'ffmpeg-8.1-full_build/bin'
+  );
 
-export const YTDLP_EXE = path.join(
-  WINGET_BASE,
-  'yt-dlp.yt-dlp_Microsoft.Winget.Source_8wekyb3d8bbwe/yt-dlp.exe'
-);
+export const FFMPEG_EXE: string =
+  process.env.FFMPEG_EXE ??
+  `${FFMPEG_BIN}/ffmpeg.exe`;
 
-// Garante ffmpeg no PATH
-if (!process.env.PATH?.includes(FFMPEG_BIN)) {
+// Garante ffmpeg no PATH (Windows — sem efeito em sistemas sem separador ';')
+if (FFMPEG_BIN && !process.env.PATH?.includes(FFMPEG_BIN)) {
   process.env.PATH = `${FFMPEG_BIN};${process.env.PATH ?? ''}`;
 }
 
@@ -62,11 +72,11 @@ export async function searchYouTube(query: string, limit = 5): Promise<TrackInfo
           try {
             const item = JSON.parse(line);
             return {
-              title: item.title ?? 'Desconhecido',
-              artist: item.uploader ?? item.channel ?? 'YouTube',
+              title:     item.title    ?? 'Desconhecido',
+              artist:    item.uploader ?? item.channel ?? 'YouTube',
               youtubeId: item.id,
               thumbnail: item.thumbnail,
-              duration: item.duration,
+              duration:  item.duration,
             } as TrackInfo;
           } catch { return null; }
         })
