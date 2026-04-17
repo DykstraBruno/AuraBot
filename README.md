@@ -29,11 +29,11 @@ Funciona como o Spotify — você instala e abre.
 
 Baixe o instalador para o seu sistema:
 
-| Sistema | Download | Tamanho |
-|---------|----------|---------|
+| Sistema     | Download            | Tamanho |
+| ----------- | ------------------- | ------- |
 | **Windows** | `AuraBot-Setup.exe` | ~120 MB |
-| **macOS** | `AuraBot.dmg` | ~140 MB |
-| **Linux** | `AuraBot.AppImage` | ~130 MB |
+| **macOS**   | `AuraBot.dmg`       | ~140 MB |
+| **Linux**   | `AuraBot.AppImage`  | ~130 MB |
 
 > Acesse a [página de releases](https://github.com/SEU_USER/AuraBot/releases/latest) para baixar a versão mais recente.
 
@@ -73,7 +73,7 @@ Na **primeira vez** que abrir o AuraBot, uma tela de configuração aparece pedi
 
 > As chaves ficam salvas no seu computador e nunca são enviadas para nenhum servidor externo além dos próprios serviços (Spotify, YouTube, OpenAI).
 
-### Spotify *(obrigatório)*
+### Spotify _(obrigatório)_
 
 Necessário para buscar músicas e ver metadados.
 
@@ -82,7 +82,7 @@ Necessário para buscar músicas e ver metadados.
 3. Preencha qualquer nome e adicione `http://localhost:3001` em Redirect URIs
 4. Copie o **Client ID** e **Client Secret**
 
-### YouTube *(obrigatório)*
+### YouTube _(obrigatório)_
 
 Necessário para busca alternativa de músicas.
 
@@ -93,7 +93,7 @@ Necessário para busca alternativa de músicas.
 
 > Cota gratuita: 10.000 buscas por dia — mais do que suficiente para uso pessoal.
 
-### OpenAI *(opcional — para comandos por voz)*
+### OpenAI _(opcional — para comandos por voz)_
 
 Necessário apenas se quiser usar o microfone para controlar o player por voz.
 
@@ -110,26 +110,26 @@ Clique no botão de microfone e fale naturalmente. O AuraBot entende **Portuguê
 
 ### 🇧🇷 Português
 
-| O que dizer | Ação |
-|------------|------|
-| `"Toque Bohemian Rhapsody"` | Toca a música |
-| `"Coloca Hotel California"` | Toca a música |
-| `"Quero ouvir Queen"` | Busca por artista |
-| `"Para"` | Para a reprodução |
-| `"Próxima"` | Avança na fila |
-| `"Mais alto"` | Volume +10% |
-| `"Mais baixo"` | Volume −10% |
+| O que dizer                 | Ação              |
+| --------------------------- | ----------------- |
+| `"Toque Bohemian Rhapsody"` | Toca a música     |
+| `"Coloca Hotel California"` | Toca a música     |
+| `"Quero ouvir Queen"`       | Busca por artista |
+| `"Para"`                    | Para a reprodução |
+| `"Próxima"`                 | Avança na fila    |
+| `"Mais alto"`               | Volume +10%       |
+| `"Mais baixo"`              | Volume −10%       |
 
 ### 🇺🇸 English
 
-| What to say | Action |
-|------------|--------|
-| `"Play Bohemian Rhapsody"` | Plays the song |
+| What to say                 | Action         |
+| --------------------------- | -------------- |
+| `"Play Bohemian Rhapsody"`  | Plays the song |
 | `"Put on Hotel California"` | Plays the song |
-| `"Stop"` | Stops playback |
-| `"Next"` | Skips to next |
-| `"Turn up"` | Volume +10% |
-| `"Turn down"` | Volume −10% |
+| `"Stop"`                    | Stops playback |
+| `"Next"`                    | Skips to next  |
+| `"Turn up"`                 | Volume +10%    |
+| `"Turn down"`               | Volume −10%    |
 
 > Falar apenas o nome da música sem prefixo também funciona:  
 > `"Bohemian Rhapsody"` → toca a música diretamente.
@@ -201,16 +201,16 @@ Esta seção é para quem quer modificar o código ou contribuir com o projeto.
 
 ### Tecnologias
 
-| Camada | Stack |
-|--------|-------|
+| Camada          | Stack                                    |
+| --------------- | ---------------------------------------- |
 | **App desktop** | Electron 28, empacota frontend + backend |
-| **Interface** | React 18, Vite, TypeScript, Zustand |
-| **API** | Node.js 20, Express, Prisma, PostgreSQL |
-| **Voz** | OpenAI Whisper (STT) + TTS |
-| **Música** | Spotify API + yt-dlp + ffmpeg |
-| **Discord** | discord.js v14, @discordjs/voice v0.19 |
-| **Testes** | Vitest, Testing Library (~220 casos) |
-| **CI/CD** | GitHub Actions |
+| **Interface**   | React 18, Vite, TypeScript, Zustand      |
+| **API**         | Node.js 20, Express, Prisma, PostgreSQL  |
+| **Voz**         | OpenAI Whisper (STT) + TTS               |
+| **Música**      | Spotify API + yt-dlp + ffmpeg            |
+| **Discord**     | discord.js v14, @discordjs/voice v0.19   |
+| **Testes**      | Vitest, Testing Library (~220 casos)     |
+| **CI/CD**       | GitHub Actions                           |
 
 ### Estrutura do projeto
 
@@ -232,11 +232,11 @@ aurabot/
 
 ### Pré-requisitos para desenvolvimento
 
-| Ferramenta | Versão |
-|-----------|--------|
-| Node.js | ≥ 20 |
-| npm | ≥ 10 |
-| Docker | ≥ 24 (para o banco de dados) |
+| Ferramenta | Versão                       |
+| ---------- | ---------------------------- |
+| Node.js    | ≥ 20                         |
+| npm        | ≥ 10                         |
+| Docker     | ≥ 24 (para o banco de dados) |
 
 ### Rodando em modo desenvolvimento
 
@@ -336,6 +336,82 @@ Isso gera `icon.ico` (Windows), `icon.icns` (macOS) e `icon.png` (Linux).
 
 **Autocomplete não aparece no /play**  
 → Rode o deploy-commands novamente e aguarde 1-2 minutos para o Discord atualizar.
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Seja corrigindo bugs, adicionando features ou melhorando a documentação, sua ajuda é valiosa.
+
+### Reportar bugs
+
+Encontrou um problema? Abra uma [issue no GitHub](https://github.com/SEU_USER/AuraBot/issues) com:
+
+- Descrição clara do bug
+- Passos para reproduzir
+- O que aconteceu vs. o que deveria acontecer
+- Sistema operacional e versão do AuraBot
+- Logs (se houver)
+
+### Sugerir features
+
+Tem uma ideia legal? Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) ou [issue](https://github.com/SEU_USER/AuraBot/issues) etiquetada como `enhancement`.
+
+### Processo de contribuição
+
+1. **Fork o repositório** — clique em "Fork" no GitHub
+2. **Clone sua cópia**:
+   ```bash
+   git clone https://github.com/seu_usuario/AuraBot.git
+   cd AuraBot
+   ```
+3. **Crie uma branch** para sua feature/fix:
+   ```bash
+   git checkout -b fix/nome-do-bug
+   # ou
+   git checkout -b feature/minha-feature
+   ```
+4. **Instale dependências e configure ambiente** (veja [Para desenvolvedores](#-para-desenvolvedores)):
+   ```bash
+   npm install
+   npm run docker:up
+   npm run db:migrate
+   ```
+5. **Faça as alterações** e teste localmente:
+   ```bash
+   npm run dev          # testar no navegador
+   npm run dev:app      # testar no Electron
+   npm test             # executar testes
+   ```
+6. **Commit com mensagens claras**:
+   ```bash
+   git commit -m "fix: corrigir reprodução de áudio"
+   git commit -m "feat: adicionar shuffle na fila"
+   ```
+7. **Push para sua branch**:
+   ```bash
+   git push origin fix/nome-do-bug
+   ```
+8. **Abra um Pull Request** no repositório original — descreva o que foi feito
+
+### Padrões de código
+
+- **TypeScript**: use tipos explícitos, evite `any`
+- **Formatação**: o projeto usa Prettier — execute `npm run format`
+- **Linting**: execute `npm run lint` para verificar
+- **Testes**: adicione testes para features novas
+- **Commits**: use formato semântico (fix:, feat:, docs:, test:, etc.)
+
+### Diretrizes gerais
+
+- Trabalhe em features pequenas e focadas
+- Rebase sua branch antes de abrir o PR para manter o histórico limpo
+- Descreva bem o que o PR faz no corpo da mensagem
+- Seja respeitoso — somos uma comunidade amigável!
+
+### Dúvidas?
+
+Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) se tiver dúvidas sobre o processo ou a arquitetura.
 
 ---
 
