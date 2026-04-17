@@ -2,10 +2,10 @@
 
 # 🎵 AuraBot
 
-**Bot de música controlado por voz — instale e use como qualquer programa**
+**Voice-controlled music bot — install and use like any program**
 
-Fale o nome da música, o AuraBot toca. Sem terminal, sem configuração técnica.  
-Funciona como o Spotify — você instala e abre.
+Say the song name, AuraBot plays it. No terminal, no technical setup.  
+Works like Spotify — you install and open it.
 
 [![CI](https://github.com/SEU_USER/AuraBot/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU_USER/AuraBot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -19,7 +19,9 @@ Funciona como o Spotify — você instala e abre.
 
 <br />
 
-[Download](#-download) · [Instalação](#-instalação) · [Configuração](#-configuração-de-apis) · [Comandos de voz](#-comandos-de-voz) · [Discord bot](#-discord-bot) · [Para desenvolvedores](#-para-desenvolvedores)
+**Available in:** [🇺🇸 English](#) · [🇧🇷 Português](README.pt-BR.md)
+
+[Download](#-download) · [Installation](#-installation) · [Configuration](#-api-configuration) · [Voice Commands](#-voice-commands) · [Discord Bot](#-discord-bot) · [For Developers](#-for-developers)
 
 </div>
 
@@ -27,98 +29,98 @@ Funciona como o Spotify — você instala e abre.
 
 ## 📥 Download
 
-Baixe o instalador para o seu sistema:
+Download the installer for your system:
 
-| Sistema     | Download            | Tamanho |
-| ----------- | ------------------- | ------- |
-| **Windows** | `AuraBot-Setup.exe` | ~120 MB |
-| **macOS**   | `AuraBot.dmg`       | ~140 MB |
-| **Linux**   | `AuraBot.AppImage`  | ~130 MB |
+| System      | Download            | Size   |
+| ----------- | ------------------- | ------ |
+| **Windows** | `AuraBot-Setup.exe` | ~120MB |
+| **macOS**   | `AuraBot.dmg`       | ~140MB |
+| **Linux**   | `AuraBot.AppImage`  | ~130MB |
 
-> Acesse a [página de releases](https://github.com/SEU_USER/AuraBot/releases/latest) para baixar a versão mais recente.
+> Visit the [releases page](https://github.com/SEU_USER/AuraBot/releases/latest) to download the latest version.
 
 ---
 
-## 🚀 Instalação
+## 🚀 Installation
 
 ### Windows
 
-1. Baixe o `AuraBot-Setup.exe`
-2. Execute o instalador
-3. Clique em **Instalar**
-4. O AuraBot abre automaticamente
+1. Download `AuraBot-Setup.exe`
+2. Run the installer
+3. Click **Install**
+4. AuraBot opens automatically
 
 ### macOS
 
-1. Baixe o `AuraBot.dmg`
-2. Abra o arquivo `.dmg`
-3. Arraste o AuraBot para a pasta **Aplicativos**
-4. Abra o AuraBot pela primeira vez
+1. Download `AuraBot.dmg`
+2. Open the `.dmg` file
+3. Drag AuraBot to the **Applications** folder
+4. Open AuraBot for the first time
 
-> **Aviso de segurança no macOS:** na primeira vez pode aparecer "desenvolvedor não verificado". Vá em **Ajustes → Privacidade e Segurança → Abrir assim mesmo**.
+> **Security warning on macOS:** the first time might show "developer unverified". Go to **System Preferences → Privacy & Security → Open Anyway**.
 
 ### Linux
 
 ```bash
-# Dê permissão de execução e rode
+# Give execution permission and run
 chmod +x AuraBot-*.AppImage
 ./AuraBot-*.AppImage
 ```
 
 ---
 
-## 🔑 Configuração de APIs
+## 🔑 API Configuration
 
-Na **primeira vez** que abrir o AuraBot, uma tela de configuração aparece pedindo as chaves de API. Isso só é feito uma vez.
+The **first time** you open AuraBot, a configuration screen appears asking for API keys. This is only done once.
 
-> As chaves ficam salvas no seu computador e nunca são enviadas para nenhum servidor externo além dos próprios serviços (Spotify, YouTube, OpenAI).
+> Your keys are saved on your computer and never sent to any external server except the services themselves (Spotify, YouTube, OpenAI).
 
-### Spotify _(obrigatório)_
+### Spotify _(required)_
 
-Necessário para buscar músicas e ver metadados.
+Required to search for songs and view metadata.
 
-1. Acesse [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) e faça login
-2. Clique em **Create app**
-3. Preencha qualquer nome e adicione `http://localhost:3001` em Redirect URIs
-4. Copie o **Client ID** e **Client Secret**
+1. Visit [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) and log in
+2. Click **Create app**
+3. Fill in any name and add `http://localhost:3001` in Redirect URIs
+4. Copy the **Client ID** and **Client Secret**
 
-### YouTube _(obrigatório)_
+### YouTube _(required)_
 
-Necessário para busca alternativa de músicas.
+Required for alternative music search.
 
-1. Acesse [console.cloud.google.com](https://console.cloud.google.com)
-2. Crie um projeto → **APIs e serviços** → **Biblioteca**
-3. Ative a **YouTube Data API v3**
-4. **Credenciais** → **Criar credenciais** → **Chave de API**
+1. Visit [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a project → **APIs and Services** → **Library**
+3. Enable **YouTube Data API v3**
+4. **Credentials** → **Create Credentials** → **API Key**
 
-> Cota gratuita: 10.000 buscas por dia — mais do que suficiente para uso pessoal.
+> Free quota: 10,000 searches per day — more than enough for personal use.
 
-### OpenAI _(opcional — para comandos por voz)_
+### OpenAI _(optional — for voice commands)_
 
-Necessário apenas se quiser usar o microfone para controlar o player por voz.
+Required only if you want to use the microphone to control playback by voice.
 
-1. Acesse [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Clique em **Create new secret key**
+1. Visit [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Click **Create new secret key**
 
-> Custo: ~$0.006 por minuto de áudio. Uma sessão de 1 hora de uso intenso custa menos de $0.50.
+> Cost: ~$0.006 per minute of audio. An hour of intensive use costs less than $0.50.
 
 ---
 
-## 🎙 Comandos de voz
+## 🎙 Voice Commands
 
-Clique no botão de microfone e fale naturalmente. O AuraBot entende **Português** e **Inglês**.
+Click the microphone button and speak naturally. AuraBot understands **Portuguese** and **English**.
 
-### 🇧🇷 Português
+### 🇧🇷 Portuguese
 
-| O que dizer                 | Ação              |
-| --------------------------- | ----------------- |
-| `"Toque Bohemian Rhapsody"` | Toca a música     |
-| `"Coloca Hotel California"` | Toca a música     |
-| `"Quero ouvir Queen"`       | Busca por artista |
-| `"Para"`                    | Para a reprodução |
-| `"Próxima"`                 | Avança na fila    |
-| `"Mais alto"`               | Volume +10%       |
-| `"Mais baixo"`              | Volume −10%       |
+| What to say                 | Action           |
+| --------------------------- | ---------------- |
+| `"Toque Bohemian Rhapsody"` | Plays the song   |
+| `"Coloca Hotel California"` | Plays the song   |
+| `"Quero ouvir Queen"`       | Search by artist |
+| `"Para"`                    | Stop playback    |
+| `"Próxima"`                 | Skip to next     |
+| `"Mais alto"`               | Volume +10%      |
+| `"Mais baixo"`              | Volume −10%      |
 
 ### 🇺🇸 English
 
@@ -131,14 +133,14 @@ Clique no botão de microfone e fale naturalmente. O AuraBot entende **Portuguê
 | `"Turn up"`                 | Volume +10%    |
 | `"Turn down"`               | Volume −10%    |
 
-> Falar apenas o nome da música sem prefixo também funciona:  
-> `"Bohemian Rhapsody"` → toca a música diretamente.
+> Just saying the song name without a prefix also works:  
+> `"Bohemian Rhapsody"` → plays the song directly.
 
 ---
 
-## 🎮 Discord bot
+## 🎮 Discord Bot
 
-O AuraBot também funciona como bot no Discord. O bot busca e toca músicas do YouTube diretamente, sem depender do backend ou banco de dados.
+AuraBot also works as a bot on Discord. The bot searches and plays songs from YouTube directly, without depending on the backend or database.
 
 ### Slash commands
 
@@ -151,43 +153,43 @@ O AuraBot também funciona como bot no Discord. O bot busca e toca músicas do Y
 /queue
 ```
 
-O autocomplete sugere músicas enquanto você digita — sem precisar enviar o comando antes.
+The autocomplete suggests songs as you type — no need to send the command first.
 
-### Dependências do bot
+### Bot dependencies
 
-O bot requer **yt-dlp** e **ffmpeg** instalados na máquina. No Windows via winget:
+The bot requires **yt-dlp** and **ffmpeg** installed on your machine. On Windows via winget:
 
 ```powershell
 winget install yt-dlp.yt-dlp
 winget install Gyan.FFmpeg
 ```
 
-### Configurar o bot Discord
+### Setting up the Discord bot
 
-1. Acesse [discord.com/developers/applications](https://discord.com/developers/applications)
-2. **New Application** → dê um nome → **Create**
-3. Menu lateral → **Bot** → **Reset Token** → copie o token
-4. Ative todos os **Privileged Gateway Intents**
-5. **OAuth2** → **URL Generator** → marque `bot` e `applications.commands`
-6. Adicione a permissão **Administrator** (ou no mínimo: Connect, Speak, Use Slash Commands)
-7. Copie o link gerado e adicione o bot ao seu servidor
+1. Visit [discord.com/developers/applications](https://discord.com/developers/applications)
+2. **New Application** → give it a name → **Create**
+3. Sidebar → **Bot** → **Reset Token** → copy the token
+4. Enable all **Privileged Gateway Intents**
+5. **OAuth2** → **URL Generator** → check `bot` and `applications.commands`
+6. Add **Administrator** permission (or minimum: Connect, Speak, Use Slash Commands)
+7. Copy the generated link and add the bot to your server
 
-Configure o arquivo `discord/.env`:
+Configure the `discord/.env` file:
 
 ```env
-DISCORD_TOKEN=token_do_bot
+DISCORD_TOKEN=your_bot_token
 DISCORD_CLIENT_ID=application_id
-DISCORD_GUILD_ID=id_do_servidor
+DISCORD_GUILD_ID=server_id
 ```
 
-Registre os slash commands no servidor (necessário apenas uma vez ou ao adicionar comandos novos):
+Register slash commands on the server (only needed once or when adding new commands):
 
 ```bash
 cd discord
 node dist/deploy-commands.js
 ```
 
-Inicie o bot:
+Start the bot:
 
 ```bash
 node dist/index.js
@@ -195,75 +197,75 @@ node dist/index.js
 
 ---
 
-## 🛠 Para desenvolvedores
+## 🛠 For Developers
 
-Esta seção é para quem quer modificar o código ou contribuir com o projeto.
+This section is for those who want to modify the code or contribute to the project.
 
-### Tecnologias
+### Technologies
 
-| Camada          | Stack                                    |
-| --------------- | ---------------------------------------- |
-| **App desktop** | Electron 28, empacota frontend + backend |
-| **Interface**   | React 18, Vite, TypeScript, Zustand      |
-| **API**         | Node.js 20, Express, Prisma, PostgreSQL  |
-| **Voz**         | OpenAI Whisper (STT) + TTS               |
-| **Música**      | Spotify API + yt-dlp + ffmpeg            |
-| **Discord**     | discord.js v14, @discordjs/voice v0.19   |
-| **Testes**      | Vitest, Testing Library (~220 casos)     |
-| **CI/CD**       | GitHub Actions                           |
+| Layer       | Stack                                     |
+| ----------- | ----------------------------------------- |
+| **Desktop** | Electron 28, packages frontend + backend  |
+| **UI**      | React 18, Vite, TypeScript, Zustand       |
+| **API**     | Node.js 20, Express, Prisma, PostgreSQL   |
+| **Voice**   | OpenAI Whisper (STT) + TTS                |
+| **Music**   | Spotify API + yt-dlp + ffmpeg             |
+| **Discord** | discord.js v14, @discordjs/voice v0.19    |
+| **Tests**   | Vitest, Testing Library (~220 test cases) |
+| **CI/CD**   | GitHub Actions                            |
 
-### Estrutura do projeto
+### Project structure
 
 ```
 aurabot/
-├── electron/        # Empacota tudo como app instalável
+├── electron/        # Packages everything as an installable app
 │   └── src/
-│       ├── main.js          # Processo principal — inicia backend, cria janela
-│       ├── preload.js       # Bridge segura entre Electron e React
-│       ├── setup.js         # Configuração automática no primeiro uso
-│       ├── ipc.js           # Comunicação entre processos
-│       └── config-screen.html  # Tela de configuração inicial
+│       ├── main.js          # Main process — starts backend, creates window
+│       ├── preload.js       # Secure bridge between Electron and React
+│       ├── setup.js         # Auto-configuration on first run
+│       ├── ipc.js           # Inter-process communication
+│       └── config-screen.html  # Initial configuration screen
 │
-├── frontend/        # Interface React (vira a janela do app)
-├── backend/         # API Node.js (roda em segundo plano no app)
-├── discord/         # Bot Discord independente
-└── desktop/         # CLI opcional para terminal
+├── frontend/        # React UI (becomes the app window)
+├── backend/         # Node.js API (runs in background in the app)
+├── discord/         # Standalone Discord bot
+└── desktop/         # Optional CLI for terminal
 ```
 
-### Pré-requisitos para desenvolvimento
+### Development prerequisites
 
-| Ferramenta | Versão                       |
-| ---------- | ---------------------------- |
-| Node.js    | ≥ 20                         |
-| npm        | ≥ 10                         |
-| Docker     | ≥ 24 (para o banco de dados) |
+| Tool    | Version                 |
+| ------- | ----------------------- |
+| Node.js | ≥ 20                    |
+| npm     | ≥ 10                    |
+| Docker  | ≥ 24 (for the database) |
 
-### Rodando em modo desenvolvimento
+### Running in development mode
 
 ```bash
-# 1. Clonar e instalar
+# 1. Clone and install
 git clone https://github.com/SEU_USER/AuraBot.git
 cd AuraBot
 npm install
 
-# 2. Configurar variáveis de ambiente
+# 2. Set up environment variables
 cp backend/.env.example backend/.env
-# Edite backend/.env com suas chaves de API
+# Edit backend/.env with your API keys
 
-# 3. Subir banco de dados
+# 3. Start the database
 npm run docker:up
 npm run db:migrate
 npm run db:seed
 
-# 4. Iniciar o app completo (backend + frontend + Electron)
+# 4. Start the full app (backend + frontend + Electron)
 npm run dev:app
 
-# Ou separadamente:
-npm run dev          # só backend + frontend no navegador
-npm run dev:discord  # bot Discord (terminal separado)
+# Or separately:
+npm run dev          # just backend + frontend in the browser
+npm run dev:discord  # Discord bot (separate terminal)
 ```
 
-### Gerando os instaladores
+### Building installers
 
 ```bash
 # Windows (.exe)
@@ -276,147 +278,147 @@ npm run build:app:mac
 npm run build:app:linux
 ```
 
-Os instaladores ficam em `electron/dist/`.
+Installers are placed in `electron/dist/`.
 
-> **Nota:** para gerar o `.exe` no Windows, o `.dmg` no macOS e o `.AppImage` no Linux, o build precisa rodar no sistema operacional correspondente (ou via GitHub Actions).
+> **Note:** To generate the `.exe` on Windows, `.dmg` on macOS, and `.AppImage` on Linux, the build needs to run on the corresponding operating system (or via GitHub Actions).
 
-### Gerando instaladores via GitHub Actions
+### Building installers via GitHub Actions
 
-Ao criar uma tag de versão, o GitHub Actions gera automaticamente os instaladores para os 3 sistemas e os publica na página de releases:
+When you create a version tag, GitHub Actions automatically generates installers for all 3 systems and publishes them on the releases page:
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-O pipeline `build-installers.yml` roda em Windows, macOS e Linux em paralelo e anexa os instaladores à release.
+The `build-installers.yml` pipeline runs on Windows, macOS, and Linux in parallel and attaches the installers to the release.
 
-### Rodando os testes
+### Running tests
 
 ```bash
-# Todos os workspaces
+# All workspaces
 npm test
 
-# Backend com cobertura
+# Backend with coverage
 cd backend && npm run test:coverage
 
 # Watch mode
 cd backend && npm run test:watch
 ```
 
-### Configuração de ícones
+### Icon setup
 
-Para gerar os ícones do aplicativo, coloque um PNG de 1024×1024 pixels em `electron/assets/logo.png` e execute:
+To generate application icons, place a 1024×1024 PNG in `electron/assets/logo.png` and run:
 
 ```bash
 npm install -g electron-icon-builder
 electron-icon-builder --input=electron/assets/logo.png --output=electron/assets/
 ```
 
-Isso gera `icon.ico` (Windows), `icon.icns` (macOS) e `icon.png` (Linux).
+This generates `icon.ico` (Windows), `icon.icns` (macOS), and `icon.png` (Linux).
 
 ---
 
-## 🔧 Problemas comuns
+## 🔧 Troubleshooting
 
-**O app abre mas não toca música**  
-→ Verifique se as chaves de API estão preenchidas. Vá em **Menu → Configurações** para editá-las.
+**The app opens but doesn't play music**  
+→ Check if API keys are filled in. Go to **Menu → Settings** to edit them.
 
-**"Desenvolvedor não verificado" no macOS**  
-→ Ajustes → Privacidade e Segurança → Abrir assim mesmo.
+**"Developer not verified" on macOS**  
+→ System Preferences → Privacy & Security → Open Anyway.
 
-**O microfone não funciona**  
-→ A chave da OpenAI é necessária para comandos de voz. Sem ela, apenas a busca por texto funciona.
+**Microphone doesn't work**  
+→ OpenAI key is required for voice commands. Without it, only text search works.
 
-**Bot Discord não responde**  
-→ Execute `cd discord && node dist/deploy-commands.js` para registrar os slash commands.
+**Discord bot not responding**  
+→ Run `cd discord && node dist/deploy-commands.js` to register slash commands.
 
-**Bot entra no canal mas não toca som**  
-→ Verifique se `yt-dlp` e `ffmpeg` estão instalados e no PATH (`winget install yt-dlp.yt-dlp` e `winget install Gyan.FFmpeg`).
+**Bot joins channel but no sound**  
+→ Check if `yt-dlp` and `ffmpeg` are installed and in PATH (`winget install yt-dlp.yt-dlp` and `winget install Gyan.FFmpeg`).
 
-**Autocomplete não aparece no /play**  
-→ Rode o deploy-commands novamente e aguarde 1-2 minutos para o Discord atualizar.
+**Autocomplete doesn't appear in /play**  
+→ Run deploy-commands again and wait 1-2 minutes for Discord to update.
 
 ---
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Seja corrigindo bugs, adicionando features ou melhorando a documentação, sua ajuda é valiosa.
+Contributions are welcome! Whether fixing bugs, adding features, or improving documentation, your help is valuable.
 
-### Reportar bugs
+### Reporting bugs
 
-Encontrou um problema? Abra uma [issue no GitHub](https://github.com/SEU_USER/AuraBot/issues) com:
+Found a problem? Open an [issue on GitHub](https://github.com/SEU_USER/AuraBot/issues) with:
 
-- Descrição clara do bug
-- Passos para reproduzir
-- O que aconteceu vs. o que deveria acontecer
-- Sistema operacional e versão do AuraBot
-- Logs (se houver)
+- Clear description of the bug
+- Steps to reproduce
+- What happened vs. what should happen
+- Your operating system and AuraBot version
+- Logs (if available)
 
-### Sugerir features
+### Suggesting features
 
-Tem uma ideia legal? Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) ou [issue](https://github.com/SEU_USER/AuraBot/issues) etiquetada como `enhancement`.
+Have a cool idea? Open a [discussion](https://github.com/SEU_USER/AuraBot/discussions) or [issue](https://github.com/SEU_USER/AuraBot/issues) labeled as `enhancement`.
 
-### Processo de contribuição
+### Contribution process
 
-1. **Fork o repositório** — clique em "Fork" no GitHub
-2. **Clone sua cópia**:
+1. **Fork the repository** — click "Fork" on GitHub
+2. **Clone your copy**:
    ```bash
-   git clone https://github.com/seu_usuario/AuraBot.git
+   git clone https://github.com/your_username/AuraBot.git
    cd AuraBot
    ```
-3. **Crie uma branch** para sua feature/fix:
+3. **Create a branch** for your feature/fix:
    ```bash
-   git checkout -b fix/nome-do-bug
-   # ou
-   git checkout -b feature/minha-feature
+   git checkout -b fix/bug-name
+   # or
+   git checkout -b feature/my-feature
    ```
-4. **Instale dependências e configure ambiente** (veja [Para desenvolvedores](#-para-desenvolvedores)):
+4. **Install dependencies and set up environment** (see [For Developers](#-for-developers)):
    ```bash
    npm install
    npm run docker:up
    npm run db:migrate
    ```
-5. **Faça as alterações** e teste localmente:
+5. **Make changes** and test locally:
    ```bash
-   npm run dev          # testar no navegador
-   npm run dev:app      # testar no Electron
-   npm test             # executar testes
+   npm run dev          # test in browser
+   npm run dev:app      # test in Electron
+   npm test             # run tests
    ```
-6. **Commit com mensagens claras**:
+6. **Commit with clear messages**:
    ```bash
-   git commit -m "fix: corrigir reprodução de áudio"
-   git commit -m "feat: adicionar shuffle na fila"
+   git commit -m "fix: correct audio playback"
+   git commit -m "feat: add shuffle to queue"
    ```
-7. **Push para sua branch**:
+7. **Push to your branch**:
    ```bash
-   git push origin fix/nome-do-bug
+   git push origin fix/bug-name
    ```
-8. **Abra um Pull Request** no repositório original — descreva o que foi feito
+8. **Open a Pull Request** on the original repository — describe what was done
 
-### Padrões de código
+### Code standards
 
-- **TypeScript**: use tipos explícitos, evite `any`
-- **Formatação**: o projeto usa Prettier — execute `npm run format`
-- **Linting**: execute `npm run lint` para verificar
-- **Testes**: adicione testes para features novas
-- **Commits**: use formato semântico (fix:, feat:, docs:, test:, etc.)
+- **TypeScript**: use explicit types, avoid `any`
+- **Formatting**: the project uses Prettier — run `npm run format`
+- **Linting**: run `npm run lint` to check
+- **Tests**: add tests for new features
+- **Commits**: use semantic format (fix:, feat:, docs:, test:, etc.)
 
-### Diretrizes gerais
+### General guidelines
 
-- Trabalhe em features pequenas e focadas
-- Rebase sua branch antes de abrir o PR para manter o histórico limpo
-- Descreva bem o que o PR faz no corpo da mensagem
-- Seja respeitoso — somos uma comunidade amigável!
+- Work on small, focused features
+- Rebase your branch before opening the PR to keep history clean
+- Describe well what your PR does in the message body
+- Be respectful — we're a friendly community!
 
-### Dúvidas?
+### Questions?
 
-Abra uma [discussion](https://github.com/SEU_USER/AuraBot/discussions) se tiver dúvidas sobre o processo ou a arquitetura.
+Open a [discussion](https://github.com/SEU_USER/AuraBot/discussions) if you have questions about the process or architecture.
 
 ---
 
-## 📄 Licença
+## 📄 License
 
 MIT © 2025 — AuraBot Contributors
 
-Veja o arquivo [LICENSE](LICENSE) para detalhes completos.
+See the [LICENSE](LICENSE) file for full details.
