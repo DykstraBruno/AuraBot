@@ -17,7 +17,7 @@ import { MusicSource, SearchResult } from '../types';
 export default function AppPage() {
   const navigate = useNavigate();
   const { user, logout: storeLogout, tokens } = useAuthStore();
-  const { current, queue, isPlaying, volume, setQueueState, setLoading, isLoading } = usePlayerStore();
+  const { current, queue, isPlaying, volume, setQueueState, setLoading, setVolume, isLoading } = usePlayerStore();
 
   const [showDupTab, setShowDupTab] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'info' | 'error' | 'success' } | null>(null);
@@ -68,10 +68,16 @@ export default function AppPage() {
           break;
         case 'turnup':
           res = await api.post('/music/volume', { direction: 'up' });
+          if (typeof res.data?.data?.volume === 'number') {
+            setVolume(res.data.data.volume);
+          }
           showToast(res.data.data.message, 'info');
           break;
         case 'turndown':
           res = await api.post('/music/volume', { direction: 'down' });
+          if (typeof res.data?.data?.volume === 'number') {
+            setVolume(res.data.data.volume);
+          }
           showToast(res.data.data.message, 'info');
           break;
       }
@@ -83,7 +89,7 @@ export default function AppPage() {
     } finally {
       setLoading(false);
     }
-  }, [setLoading, showToast, loadQueueState]);
+  }, [setLoading, setVolume, showToast, loadQueueState]);
 
   // ─── Busca de músicas ─────────────────────────────────────────────────────
   const handleSearch = useCallback(async (query: string, source: MusicSource): Promise<SearchResult[]> => {
@@ -113,6 +119,13 @@ export default function AppPage() {
         responseType: 'arraybuffer',
       });
 
+      const commandHeader = (res.headers['x-command'] ?? '').toString().toLowerCase();
+      if (commandHeader === 'turnup') {
+        setVolume(Math.min(100, volume + 10));
+      } else if (commandHeader === 'turndown') {
+        setVolume(Math.max(0, volume - 10));
+      }
+
       // Resposta em áudio (TTS) — toca automaticamente
       if (res.headers['content-type']?.includes('audio')) {
         const audioBlob = new Blob([res.data], { type: 'audio/mpeg' });
@@ -132,6 +145,11 @@ export default function AppPage() {
         const text = new TextDecoder().decode(res.data);
         const json = JSON.parse(text);
         showToast(json.data?.response ?? 'Comando executado', 'success');
+
+        const queueResultVolume = json.data?.queueResult?.volume;
+        if (typeof queueResultVolume === 'number') {
+          setVolume(queueResultVolume);
+        }
       }
 
       await loadQueueState();
@@ -141,7 +159,7 @@ export default function AppPage() {
     } finally {
       setVoiceProcessing(false);
     }
-  }, [showToast, loadQueueState]);
+  }, [showToast, loadQueueState, setVolume, volume]);
 
   // ─── Logout ───────────────────────────────────────────────────────────────
   const handleLogout = useCallback(async () => {
