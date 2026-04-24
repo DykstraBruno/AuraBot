@@ -37,35 +37,50 @@ export function PlayerControls({ onCommand, loading }: Props) {
 
   return (
     <div style={styles.wrap}>
-      {/* Volume down */}
-      <div style={styles.volGroup}>
-        <span style={styles.volLabel}>{volume}%</span>
-        <button
-          onClick={() => onCommand('turndown')}
-          disabled={loading || volume <= 0}
-          style={{ ...styles.volBtn, opacity: volume <= 0 ? 0.3 : 1 }}
-          aria-label="Diminuir volume"
-        >
-          🔉
-        </button>
-        <div style={styles.volBar}>
-          <div style={{ ...styles.volFill, width: `${volume}%` }} />
+      <div style={styles.volCard} aria-label={`Volume atual ${volume}%`}>
+        <div style={styles.volHeader}>
+          <span style={styles.volTitle}>Volume</span>
+          <span style={styles.volLabel}>{volume}%</span>
         </div>
-        <button
-          onClick={() => onCommand('turnup')}
-          disabled={loading || volume >= 100}
-          style={{ ...styles.volBtn, opacity: volume >= 100 ? 0.3 : 1 }}
-          aria-label="Aumentar volume"
-        >
-          🔊
-        </button>
+
+        <div style={styles.volGroup}>
+          <button
+            onClick={() => onCommand('turndown')}
+            disabled={loading || volume <= 0}
+            style={{ ...styles.volBtn, opacity: volume <= 0 ? 0.3 : 1 }}
+            aria-label="Diminuir volume"
+            title="Diminuir volume"
+          >
+            -
+          </button>
+
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={volume}
+            readOnly
+            aria-label="Indicador de volume"
+            style={styles.volSlider}
+          />
+
+          <button
+            onClick={() => onCommand('turnup')}
+            disabled={loading || volume >= 100}
+            style={{ ...styles.volBtn, opacity: volume >= 100 ? 0.3 : 1 }}
+            aria-label="Aumentar volume"
+            title="Aumentar volume"
+          >
+            +
+          </button>
+        </div>
       </div>
 
-      {/* Controles principais */}
       <div style={styles.main}>
-        {btn('Stop', '⏹', 'stop', false, !current && !isPlaying)}
-        {btn(isPlaying ? 'Tocando' : 'Play', isPlaying ? '▶' : '▶', 'play', isPlaying)}
-        {btn('Próxima', '⏭', 'next', false, !current)}
+        {btn('Stop', 'S', 'stop', false, !current && !isPlaying)}
+        {btn(isPlaying ? 'Tocando' : 'Play', 'P', 'play', isPlaying)}
+        {btn('Proxima', 'N', 'next', false, !current)}
       </div>
     </div>
   );
@@ -94,27 +109,54 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: '0.05em',
     textTransform: 'uppercase',
   },
+  volCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    padding: '12px',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    background: 'var(--bg-elevated)',
+  },
+  volHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  volTitle: {
+    fontSize: '11px',
+    color: 'var(--text-muted)',
+    fontFamily: 'var(--font-display)',
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+  },
   volGroup: {
-    display: 'flex', alignItems: 'center', gap: '8px',
+    display: 'flex', alignItems: 'center', gap: '10px',
   },
   volLabel: {
-    fontSize: '12px', color: 'var(--text-muted)',
+    fontSize: '14px', color: 'var(--text-primary)',
     fontFamily: 'var(--font-display)',
-    minWidth: '32px', textAlign: 'right',
+    minWidth: '40px', textAlign: 'right',
+    fontWeight: 600,
   },
   volBtn: {
-    background: 'none', border: 'none',
-    fontSize: '16px', cursor: 'pointer', padding: '4px',
+    width: '28px',
+    height: '28px',
+    borderRadius: '8px',
+    border: '1px solid var(--border)',
+    background: 'transparent',
+    color: 'var(--text-secondary)',
+    fontSize: '16px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
-  volBar: {
-    flex: 1, height: '4px',
-    background: 'var(--border)', borderRadius: '2px',
-    overflow: 'hidden',
-  },
-  volFill: {
-    height: '100%',
-    background: 'var(--amber)',
-    borderRadius: '2px',
-    transition: 'width 0.2s',
+  volSlider: {
+    flex: 1,
+    accentColor: 'var(--amber)',
+    cursor: 'default',
   },
 };
