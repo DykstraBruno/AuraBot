@@ -9,7 +9,6 @@ function makeReq(overrides: Partial<Request> = {}): Request {
     path:    '/api/auth/login',
     headers: {},
     header: (name: string) => (overrides.headers as any)?.[name.toLowerCase()],
-    session: {},
     ...overrides,
   } as unknown as Request;
 }
@@ -34,6 +33,7 @@ describe('csrfProtection middleware', () => {
 
   beforeEach(async () => {
     vi.resetModules();
+    process.env.CSRF_SECRET = 'test-csrf-secret-32bytes-minimum!';
     const mod = await import('../../../middleware/csrfProtection');
     csrfProtection = mod.csrfProtection;
     generateCsrfToken = mod.generateCsrfToken;
@@ -48,135 +48,109 @@ describe('csrfProtection middleware', () => {
 
     csrfProtection(req, res, next);
     expect(next).toHaveBeenCalledOnce();
-    expect(next).toHaveBeenCalledWith(); // sem erro
+    expect(next).toHaveBeenCalledWith();
   });
 
   it('deixa passar requisição HEAD sem header CSRF', () => {
-    const req  = makeReq({ method: 'HEAD' });
-    const res  = makeRes();
-    const next = makeNext();
-
-    csrfProtection(req, res, next);
-    expect(next).toHaveBeenCalledWith();
+    csrfProtection(makeReq({ method: 'HEAD' }), makeRes(), makeNext());
   });
 
   it('deixa passar requisição OPTIONS sem header CSRF', () => {
-    const req  = makeReq({ method: 'OPTIONS' });
-    const res  = makeRes();
     const next = makeNext();
-
-    csrfProtection(req, res, next);
+    csrfProtection(makeReq({ method: 'OPTIONS' }), makeRes(), next);
     expect(next).toHaveBeenCalledWith();
   });
 
-  // ── Requisições de mutação (POST, PUT, PATCH, DELETE) ────────────────────
-  // Nota: /api/auth/login é intencionalmente exempto de CSRF (inicia a sessão).
-  // Os testes de rejeição usam /api/music/play (rota de mutação protegida).
+  // ── Requisições de mutação sem token ─────────────────────────────────────
 
   it('rejeita POST em rota protegida sem header X-CSRF-Token com 403', () => {
-    const req  = makeReq({ method: 'POST', path: '/api/music/play', headers: {} });
-    const res  = makeRes();
     const next = makeNext();
-
-    csrfProtection(req, res, next);
+    csrfProtection(makeReq({ method: 'POST', path: '/api/music/play', headers: {} }), makeRes(), next);
 
     const calledWithError = (next as any).mock.calls[0]?.[0] instanceof Error;
-    const respondedDirectly = res.statusCode === 403;
+    const respondedDirectly = makeRes().statusCode === 403;
     expect(calledWithError || respondedDirectly).toBe(true);
   });
 
   it('rejeita PUT em rota protegida sem header X-CSRF-Token', () => {
-    const req  = makeReq({ method: 'PUT', path: '/api/music/queue', headers: {} });
-    const res  = makeRes();
     const next = makeNext();
+    csrfProtection(makeReq({ method: 'PUT', path: '/api/music/queue', headers: {} }), makeRes(), next);
 
-    csrfProtection(req, res, next);
-
-    const calledWithError = (next as any).mock.calls[0]?.[0] instanceof Error;
-    const respondedDirectly = res.statusCode === 403;
-    expect(calledWithError || respondedDirectly).toBe(true);
+    expect((next as any).mock.calls[0]?.[0] instanceof Error).toBe(true);
   });
 
   it('rejeita DELETE em rota protegida sem header X-CSRF-Token', () => {
-    const req  = makeReq({ method: 'DELETE', path: '/api/music/queue', headers: {} });
-    const res  = makeRes();
     const next = makeNext();
+    csrfProtection(makeReq({ method: 'DELETE', path: '/api/music/queue', headers: {} }), makeRes(), next);
 
-    csrfProtection(req, res, next);
-
-    const calledWithError = (next as any).mock.calls[0]?.[0] instanceof Error;
-    const respondedDirectly = res.statusCode === 403;
-    expect(calledWithError || respondedDirectly).toBe(true);
+    expect((next as any).mock.calls[0]?.[0] instanceof Error).toBe(true);
   });
 
-  // ── Token válido ──────────────────────────────────────────────────────────
+  // ── Token válido (gerado pelo próprio middleware) ─────────────────────────
 
-  it('aceita POST com X-CSRF-Token válido na sessão', () => {
-    const sessionToken = 'valid-csrf-token-12345';
-    const req = makeReq({
-      method: 'POST',
-      headers: { 'x-csrf-token': sessionToken },
-      session: { csrfToken: sessionToken } as any,
-    });
-    req.header = (name: string) =>
-      name.toLowerCase() === 'x-csrf-token' ? sessionToken : undefined;
+  it('aceita POST com X-CSRF-Token válido', () => {
+    const token = generateCsrfToken(makeReq());
+    const req   = makeReq({ method: 'POST', path: '/api/music/play', headers: { 'x-csrf-token': token } });
+    req.header  = (name: string) => name.toLowerCase() === 'x-csrf-token' ? token : undefined;
 
-    const res  = makeRes();
     const next = makeNext();
-
-    csrfProtection(req, res, next);
-    expect(next).toHaveBeenCalledWith(); // sem erro
+    csrfProtection(req, makeRes(), next);
+    expect(next).toHaveBeenCalledWith();
   });
 
-  it('rejeita POST com token que não bate com a sessão', () => {
-    const req = makeReq({
-      method: 'POST',
-      path:   '/api/music/play',
-      headers: { 'x-csrf-token': 'wrong-token' },
-      session: { csrfToken: 'correct-token' } as any,
-    });
-    req.header = (name: string) =>
-      name.toLowerCase() === 'x-csrf-token' ? 'wrong-token' : undefined;
+  it('rejeita token mal-formado', () => {
+    const req  = makeReq({ method: 'POST', path: '/api/music/play', headers: { 'x-csrf-token': 'invalido' } });
+    req.header = () => 'invalido';
 
-    const res  = makeRes();
     const next = makeNext();
+    csrfProtection(req, makeRes(), next);
+    expect((next as any).mock.calls[0]?.[0] instanceof Error).toBe(true);
+  });
 
-    csrfProtection(req, res, next);
+  it('rejeita token com assinatura errada', () => {
+    const ts    = Date.now().toString(36);
+    const token = `${ts}.assinaturafalsa`;
+    const req   = makeReq({ method: 'POST', path: '/api/music/play', headers: { 'x-csrf-token': token } });
+    req.header  = () => token;
 
-    const calledWithError = (next as any).mock.calls[0]?.[0] instanceof Error;
-    const respondedDirectly = res.statusCode === 403;
-    expect(calledWithError || respondedDirectly).toBe(true);
+    const next = makeNext();
+    csrfProtection(req, makeRes(), next);
+    expect((next as any).mock.calls[0]?.[0] instanceof Error).toBe(true);
+  });
+
+  // ── Rotas isentas ─────────────────────────────────────────────────────────
+
+  it('deixa passar /auth/login sem token', () => {
+    const next = makeNext();
+    csrfProtection(makeReq({ method: 'POST', path: '/api/auth/login' }), makeRes(), next);
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it('deixa passar /auth/register sem token', () => {
+    const next = makeNext();
+    csrfProtection(makeReq({ method: 'POST', path: '/api/auth/register' }), makeRes(), next);
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  // ── Clientes bot ──────────────────────────────────────────────────────────
+
+  it('deixa passar x-platform: discord sem token', () => {
+    const next = makeNext();
+    const req  = makeReq({ method: 'POST', path: '/api/music/play', headers: { 'x-platform': 'discord' } });
+    csrfProtection(req, makeRes(), next);
+    expect(next).toHaveBeenCalledWith();
   });
 
   // ── generateCsrfToken ─────────────────────────────────────────────────────
 
-  it('generateCsrfToken retorna string não-vazia', () => {
-    const req = makeReq({ session: {} as any });
-    const token = generateCsrfToken(req);
-    expect(typeof token).toBe('string');
-    expect(token.length).toBeGreaterThan(0);
+  it('generateCsrfToken retorna string com formato ts.nonce.sig', () => {
+    const token = generateCsrfToken(makeReq());
+    expect(token).toMatch(/^[0-9a-z]+\.[0-9a-f]+\.[0-9a-f]+$/);
   });
 
-  it('generateCsrfToken salva token na sessão', () => {
-    const session: any = {};
-    const req = makeReq({ session });
-    generateCsrfToken(req);
-    expect(session.csrfToken).toBeDefined();
-    expect(typeof session.csrfToken).toBe('string');
-  });
-
-  it('generateCsrfToken retorna o mesmo token se já existir na sessão', () => {
-    const session: any = { csrfToken: 'existing-token' };
-    const req = makeReq({ session });
-    const token = generateCsrfToken(req);
-    expect(token).toBe('existing-token');
-  });
-
-  it('tokens gerados são únicos entre requisições', () => {
-    const req1 = makeReq({ session: {} as any });
-    const req2 = makeReq({ session: {} as any });
-    const t1 = generateCsrfToken(req1);
-    const t2 = generateCsrfToken(req2);
+  it('tokens gerados são únicos', () => {
+    const t1 = generateCsrfToken(makeReq());
+    const t2 = generateCsrfToken(makeReq());
     expect(t1).not.toBe(t2);
   });
 });

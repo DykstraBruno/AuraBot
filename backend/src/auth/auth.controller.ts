@@ -82,4 +82,20 @@ export const authController = {
       res.json({ success: true, message: 'Email verificado com sucesso!' });
     } catch (err) { next(err); }
   },
+
+  async getApiKey(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?.userId) throw new AppError('Não autorizado', 401);
+      const apiKey = await authService.getApiKey(req.user.userId);
+      res.json({ success: true, data: { apiKey } });
+    } catch (err) { next(err); }
+  },
+
+  async regenerateApiKey(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?.userId) throw new AppError('Não autorizado', 401);
+      const apiKey = await authService.regenerateApiKey(req.user.userId);
+      res.json({ success: true, message: 'API key regenerada com sucesso!', data: { apiKey } });
+    } catch (err) { next(err); }
+  },
 };

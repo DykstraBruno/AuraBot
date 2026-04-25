@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { authenticate } from '../middleware/authenticate';
 import { botAuth } from '../middleware/botAuth';
+import { apiKeyAuth } from '../middleware/apiKeyAuth';
 import { voiceService, SUPPORTED_LANGUAGES } from '../voice/voice.service';
 import { AppError } from '../utils/errors';
 
@@ -23,6 +24,9 @@ voiceRouter.use((req, res, next) => {
   const platform = req.headers['x-platform'];
   if (platform === 'discord' || platform === 'desktop') {
     return botAuth(req, res, next);
+  }
+  if (req.headers['x-api-key']) {
+    return apiKeyAuth(req, res, next);
   }
   return authenticate(req, res, next);
 });

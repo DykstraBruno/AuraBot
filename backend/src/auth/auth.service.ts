@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../config/database';
 import {
@@ -48,6 +49,7 @@ export interface LoginDTO {
 export interface AuthResponse {
   user: PublicUser;
   tokens: TokenPair;
+  apiKey: string;
 }
 
 export interface PublicUser {
@@ -82,6 +84,7 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const sessionId = uuidv4();
+    const apiKey = this.generateApiKey();
 
     const user = await prisma.user.create({
       data: {
@@ -89,6 +92,7 @@ export class AuthService {
         username,
         passwordHash,
         displayName: dto.displayName?.trim() || username,
+        apiKey,
         preferences: { create: { language: 'pt-BR' } },
       },
     });
@@ -116,7 +120,7 @@ export class AuthService {
 
     logger.info(`Novo usuário cadastrado: ${user.email}`);
 
-    return { user: this.toPublicUser(user), tokens };
+    return { user: this.toPublicUser(user), tokens, apiKey: user.apiKey! };
   }
 
   // ─── Login ──────────────────────────────────────────────────────────────────
@@ -171,11 +175,18 @@ export class AuthService {
       sessionId,
     });
 
+    // Garante que o usuário sempre tem uma API key
+    let apiKey = user.apiKey;
+    if (!apiKey) {
+      apiKey = this.generateApiKey();
+      await prisma.user.update({ where: { id: user.id }, data: { apiKey } });
+    }
+
     await this.createSession(user.id, sessionId, tokens, userAgent, ipAddress, platform);
 
     logger.info(`Login: ${user.email} [${platform}]`);
 
-    return { user: this.toPublicUser(user), tokens };
+    return { user: this.toPublicUser(user), tokens, apiKey };
   }
 
   // ─── Refresh token ──────────────────────────────────────────────────────────
@@ -350,7 +361,37 @@ export class AuthService {
     ]);
   }
 
+  // ─── API Key ────────────────────────────────────────────────────────────────
+
+  async getApiKey(userId: string): Promise<string> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { apiKey: true },
+    });
+
+    if (!user) throw new UnauthorizedError('Usuário não encontrado');
+
+    if (!user.apiKey) {
+      const apiKey = this.generateApiKey();
+      await prisma.user.update({ where: { id: userId }, data: { apiKey } });
+      return apiKey;
+    }
+
+    return user.apiKey;
+  }
+
+  async regenerateApiKey(userId: string): Promise<string> {
+    const apiKey = this.generateApiKey();
+    await prisma.user.update({ where: { id: userId }, data: { apiKey } });
+    logger.info(`API key regenerada para userId=${userId}`);
+    return apiKey;
+  }
+
   // ─── Helpers privados ───────────────────────────────────────────────────────
+
+  private generateApiKey(): string {
+    return `ak_${crypto.randomBytes(32).toString('hex')}`;
+  }
 
   private async handleFailedLogin(userId: string, currentAttempts: number): Promise<void> {
     const newAttempts = currentAttempts + 1;

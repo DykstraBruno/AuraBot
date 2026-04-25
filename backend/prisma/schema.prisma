@@ -3,23 +3,24 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 // ─── Usuários ────────────────────────────────────────────────────────────────
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  username        String    @unique
-  passwordHash    String
-  displayName     String?
-  avatarUrl       String?
-  isActive        Boolean   @default(true)
-  emailVerified   Boolean   @default(false)
-  loginAttempts   Int       @default(0)
-  lockedUntil     DateTime?
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+  displayName   String?
+  avatarUrl     String?
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  loginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+
+  apiKey String? @unique // Chave de API exclusiva para autenticação
 
   // OAuth Spotify
   spotifyId           String?   @unique
@@ -28,16 +29,16 @@ model User {
   spotifyTokenExpiry  DateTime?
 
   // Relações
-  sessions        Session[]
-  passwordResets  PasswordReset[]
+  sessions           Session[]
+  passwordResets     PasswordReset[]
   emailVerifications EmailVerification[]
-  playlists       Playlist[]
-  history         PlayHistory[]
-  preferences     UserPreferences?
-  queue           QueueItem[]
+  playlists          Playlist[]
+  history            PlayHistory[]
+  preferences        UserPreferences?
+  queue              QueueItem[]
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -51,14 +52,14 @@ model Session {
   refreshToken String   @unique
   userAgent    String?
   ipAddress    String?
-  platform     String   @default("web")  // web | discord | desktop-win | desktop-mac | desktop-linux
+  platform     String   @default("web") // web | discord | desktop-win | desktop-mac | desktop-linux
   expiresAt    DateTime
   isRevoked    Boolean  @default(false)
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([refreshToken])
@@ -68,13 +69,13 @@ model Session {
 // ─── Reset de senha ───────────────────────────────────────────────────────────
 
 model PasswordReset {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -85,13 +86,13 @@ model PasswordReset {
 // ─── Verificação de email ─────────────────────────────────────────────────────
 
 model EmailVerification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -102,7 +103,7 @@ model EmailVerification {
 // ─── Músicas ──────────────────────────────────────────────────────────────────
 
 model Track {
-  id         String @id @default(cuid())
+  id         String  @id @default(cuid())
   title      String
   artist     String
   album      String?
@@ -112,11 +113,11 @@ model Track {
   youtubeId  String? @unique
   previewUrl String?
 
-  playlists  PlaylistTrack[]
-  history    PlayHistory[]
-  queue      QueueItem[]
+  playlists PlaylistTrack[]
+  history   PlayHistory[]
+  queue     QueueItem[]
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@map("tracks")
 }
@@ -124,16 +125,16 @@ model Track {
 // ─── Fila de reprodução ───────────────────────────────────────────────────────
 
 model QueueItem {
-  id        String   @id @default(cuid())
-  userId    String
-  trackId   String
-  position  Int
-  source    String   // spotify | youtube
-  addedAt   DateTime @default(now())
-  playedAt  DateTime?
+  id       String    @id @default(cuid())
+  userId   String
+  trackId  String
+  position Int
+  source   String // spotify | youtube
+  addedAt  DateTime  @default(now())
+  playedAt DateTime?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@index([userId, position])
   @@map("queue_items")
@@ -142,18 +143,18 @@ model QueueItem {
 // ─── Playlists ────────────────────────────────────────────────────────────────
 
 model Playlist {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   userId      String
   name        String
   description String?
   isPublic    Boolean @default(false)
   coverUrl    String?
 
-  tracks      PlaylistTrack[]
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks PlaylistTrack[]
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("playlists")
@@ -166,8 +167,8 @@ model PlaylistTrack {
   position   Int
   addedAt    DateTime @default(now())
 
-  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@unique([playlistId, trackId])
   @@map("playlist_tracks")
@@ -183,8 +184,8 @@ model PlayHistory {
   platform String
   playedAt DateTime @default(now())
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("play_history")
@@ -203,7 +204,7 @@ model UserPreferences {
   discordGuildId   String?
   discordChannelId String?
 
-  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
 }

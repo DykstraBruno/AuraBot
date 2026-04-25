@@ -1,11 +1,12 @@
 import app from './app';
-import { prisma } from './config/database';
+import { initDatabase, prisma } from './config/database';
 import { logger } from './utils/logger';
 
 const PORT = process.env.PORT ?? 3001;
 
 async function bootstrap() {
   try {
+    await initDatabase();
     await prisma.$connect();
     logger.info('✅ Banco de dados conectado');
 

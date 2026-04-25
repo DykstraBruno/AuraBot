@@ -46,3 +46,5 @@ authRouter.post('/verify-email', authController.verifyEmail);
 // Rotas protegidas
 authRouter.get('/me', authenticate, authController.me);
 authRouter.post('/logout-all', authenticate, authController.logoutAll);
+authRouter.get('/api-key', authenticate, authController.getApiKey);
+authRouter.post('/api-key/regenerate', authenticate, authController.regenerateApiKey);

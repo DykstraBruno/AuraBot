@@ -31,9 +31,11 @@
     "docker:build": "docker-compose build",
     "db:migrate": "npm run db:migrate --workspace=backend",
     "db:seed": "npm run db:seed --workspace=backend",
-    "discord:deploy": "npm run deploy-commands --workspace=discord"
+    "discord:deploy": "npm run deploy-commands --workspace=discord",
+    "vercel:build": "cd frontend && npm run build && cd ../backend && npx prisma generate"
   },
   "devDependencies": {
+    "@vercel/node": "^5.7.11",
     "concurrently": "^8.2.2",
     "wait-on": "^7.2.0"
   },
