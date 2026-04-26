@@ -17,8 +17,8 @@ async function createPrismaClient(): Promise<PrismaClient> {
     const ws                    = await import('ws');
 
     neonConfig.webSocketConstructor = ws.default;
-    const pool    = new Pool({ connectionString: url });
-    const adapter = new PrismaNeon(pool);
+    const pool    = new Pool({ connectionString: url } as any);
+    const adapter = new PrismaNeon(pool as any);
 
     return new PrismaClient({
       adapter,

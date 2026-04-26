@@ -1,6 +1,7 @@
 import { prisma } from '../config/database';
 import { ExternalAPIError, AppError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { spawn } from 'child_process';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -85,10 +86,6 @@ export class MusicService {
     return results;
   }
 
-  // ─── Spotify ──────────────────────────────────────────────────────────────
-
-  import { spawn } from 'child_process';
-
   async searchSpotify(query: string, limit = 10): Promise<SearchResult[]> {
     return new Promise((resolve, reject) => {
       const args = [
@@ -126,9 +123,7 @@ export class MusicService {
     });
   }
 
-  // ─── YouTube ──────────────────────────────────────────────────────────────
 
-  import { spawn } from 'child_process';
 
   async searchYouTube(query: string, limit = 10): Promise<SearchResult[]> {
     return new Promise((resolve, reject) => {
@@ -162,7 +157,7 @@ export class MusicService {
               };
             } catch { return null; }
           })
-          .filter((r): r is SearchResult => r !== null && Boolean(r.sourceId));
+          .filter((r): r is NonNullable<typeof r> => r !== null && Boolean(r?.sourceId)) as SearchResult[];
         resolve(results);
       });
       proc.on('error', (err) => { clearTimeout(timer); reject(err); });

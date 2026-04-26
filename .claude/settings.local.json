@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_claude-mem_mcp-search__smart_outline"
+      "mcp__plugin_claude-mem_mcp-search__smart_outline",
+      "Bash(npx prisma *)",
+      "Bash(node -e \"const p = require\\('@neondatabase/serverless/package.json'\\); console.log\\('@neondatabase/serverless:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('pg/package.json'\\); console.log\\('pg:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./backend/node_modules/@neondatabase/serverless/package.json'\\); console.log\\('@neondatabase/serverless:', p.version\\)\")",
+      "Bash(node -e \"try { const p = require\\('./backend/node_modules/pg/package.json'\\); console.log\\('pg:', p.version\\) } catch\\(e\\) { const p = require\\('./node_modules/pg/package.json'\\); console.log\\('pg \\(root\\):', p.version\\) }\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@neondatabase/serverless/package.json'\\); console.log\\('@neondatabase/serverless:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/pg/package.json'\\); console.log\\('pg:', p.version\\)\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); console.log\\('version:', JSON.parse\\(d\\).version\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npm install *)"
     ]
   }
 }
