@@ -2,6 +2,7 @@ import { prisma } from '../config/database';
 import { ExternalAPIError, AppError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { spawn } from 'child_process';
+import ytdl from '@distube/ytdl-core';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -208,9 +209,14 @@ export class MusicService {
     });
   }
 
-  // ─── Spotify token (Client Credentials) ───────────────────────────────────
+  // ─── Stream URL (ytdl-core) ───────────────────────────────────────────────
 
-  // getSpotifyClientToken e invalidateSpotifyToken removidos (não necessários)
+  async getYouTubeAudioUrl(videoId: string): Promise<string> {
+    const info   = await ytdl.getInfo(`https://www.youtube.com/watch?v=${videoId}`);
+    const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio', filter: 'audioonly' });
+    if (!format?.url) throw new ExternalAPIError('YouTube', 'Formato de áudio não encontrado');
+    return format.url;
+  }
 }
 
 export const musicService = new MusicService();

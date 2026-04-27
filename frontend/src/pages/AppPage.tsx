@@ -22,7 +22,8 @@ export default function AppPage() {
   const [showDupTab, setShowDupTab] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'info' | 'error' | 'success' } | null>(null);
   const [voiceProcessing, setVoiceProcessing] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef      = useRef<HTMLAudioElement | null>(null);
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // ─── Single-tab enforcement ───────────────────────────────────────────────
   useSingleTab(() => setShowDupTab(true));
@@ -31,6 +32,42 @@ export default function AppPage() {
   useEffect(() => {
     loadQueueState();
   }, []);
+
+  // ─── Player de música (YouTube) ───────────────────────────────────────────
+  const currentYouTubeId = current?.track?.youtubeId ?? null;
+
+  useEffect(() => {
+    const el = musicAudioRef.current;
+    if (!el) return;
+
+    if (!currentYouTubeId) {
+      el.pause();
+      el.src = '';
+      return;
+    }
+
+    let cancelled = false;
+    el.pause();
+
+    api.get('/music/audio-url', { params: { youtubeId: currentYouTubeId } })
+      .then(({ data }) => {
+        if (cancelled) return;
+        el.src = data.data.url;
+        el.volume = volume / 100;
+        el.play().catch(() => {});
+      })
+      .catch(() => {
+        if (!cancelled) showToast('Erro ao carregar áudio da música', 'error');
+      });
+
+    return () => { cancelled = true; };
+  }, [currentYouTubeId]);
+
+  useEffect(() => {
+    if (musicAudioRef.current) {
+      musicAudioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
 
   const loadQueueState = useCallback(async () => {
     try {
@@ -259,6 +296,14 @@ export default function AppPage() {
 
       {/* Audio element para TTS */}
       <audio ref={audioRef} style={{ display: 'none' }} aria-hidden />
+
+      {/* Audio element para música */}
+      <audio
+        ref={musicAudioRef}
+        style={{ display: 'none' }}
+        aria-hidden
+        onEnded={() => handleCommand('next')}
+      />
 
       {/* Modal aba duplicada */}
       {showDupTab && (
