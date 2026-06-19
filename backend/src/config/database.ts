@@ -12,13 +12,13 @@ async function createPrismaClient(): Promise<PrismaClient> {
 
   // Neon serverless (produção/Vercel) — usa WebSocket adapter
   if (url.includes('neon.tech') || process.env.USE_NEON_ADAPTER === 'true') {
-    const { neonConfig, Pool }  = await import('@neondatabase/serverless');
-    const { PrismaNeon }        = await import('@prisma/adapter-neon');
-    const ws                    = await import('ws');
+    const { neonConfig } = await import('@neondatabase/serverless');
+    const { PrismaNeon } = await import('@prisma/adapter-neon');
+    const ws             = await import('ws');
 
     neonConfig.webSocketConstructor = ws.default;
-    const pool    = new Pool({ connectionString: url } as any);
-    const adapter = new PrismaNeon(pool as any);
+    // PrismaNeon v7 is a factory — pass config directly, it manages the pool internally
+    const adapter = new PrismaNeon({ connectionString: url } as any);
 
     return new PrismaClient({
       adapter,

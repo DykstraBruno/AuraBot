@@ -77,6 +77,18 @@ musicRouter.get('/queue', async (req: Request, res: Response, next: NextFunction
   } catch (err) { next(err); }
 });
 
+// GET /api/music/audio-url?youtubeId=xxx
+musicRouter.get('/audio-url', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { youtubeId } = req.query;
+    if (!youtubeId || typeof youtubeId !== 'string') {
+      throw new AppError('youtubeId é obrigatório', 400);
+    }
+    const url = await musicService.getYouTubeAudioUrl(youtubeId);
+    res.json({ success: true, data: { url } });
+  } catch (err) { next(err); }
+});
+
 // GET /api/music/history
 musicRouter.get('/history', async (req: Request, res: Response, next: NextFunction) => {
   try {

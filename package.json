@@ -8,12 +8,14 @@
     "frontend",
     "discord",
     "desktop",
-    "electron"
+    "electron",
+    "stt-api"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:stt\"",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:stt": "npm run dev --workspace=stt-api",
     "dev:discord": "npm run dev --workspace=discord",
     "dev:desktop": "npm run dev --workspace=desktop",
     "dev:app": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run electron:dev\"",
